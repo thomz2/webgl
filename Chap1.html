@@ -1,0 +1,84 @@
+<html >
+    <head>
+    <script>
+        
+        let g1 = null;
+        let positionAttribIndex = 0;
+
+        function setupWebgl (){
+            let canvas = document.getElementById("OUTPUT-CANVAS");
+            g1 = canvas.getContext("webgl");
+        }
+
+        function setupWhatToDraw(){
+            let positions = [
+                0.0, 0.0,
+                1.0, 0.0,
+                0.0, 1.0
+            ];
+            
+            //Transforma os valores em um array tipado de tamanho fixo
+            let typedPositions = new Float32Array(positions);
+            
+            //Cria um array tipado no Webgl, com tamanho fixo em uma região contígua da memória
+            //Útil pois o array do javascript aceita qualquer tipo e tem tamanho dinâmico é extremamente lento
+            //Isso poupa a grande ineficiência em seu acesso
+            let positionBuffer = gl.createBuffer();
+            
+            //Seta a referência do arraybuffer do gl para o positions buffer
+            //Significa que qualquer operação posterior sobre o gl.Array_buffer é na verdade sobre o positions buffer
+            gl.bindBuffer (gl.ARRAY_BUFFER , positionsBuffer ) ;
+
+            //Transferimos os dados de typedPositions para o ArrayBuffer
+            //Como ele guarda a referência para o positionsBuffer, na verdade estamos alterando este último
+            //Static draw é apenas uma sinalização que vamos declarar esse buffer apenas uma vez
+            //mas vamos usar os dados dele várias vezes
+            gl.bufferData (gl.ARRAY_BUFFER , typedPositions ,gl.STATIC_DRAW ) ;
+
+            //Esse atributo ser o atributo positionAttribIndex = 0
+            //Ou seja, esse vai ser o primeiro atributo dos vértices
+            gl.enableVertexAttribArray ( positionAttribIndex );
+
+            //Quando formos acessar esse atributo( de índice 0),
+            //Ele terá tamanho 2 no array, as duas posições x e y
+            //Ele terá tipo Float
+            //Não haverá espaçamento entre duas instâncias de vértices( 0,0,1,0,0,1 são três valores sem espaçamento)
+            //Ele começa da posição 0 do array
+            gl.vertexAttribPointer (positionAttribIndex , 2, gl.FLOAT , false, 0, 0);
+
+            //Exemplo -> (0,0,1,0,0,1) são os valores do array do webgl
+            //então vamos pegar de 2 em 2 para constituirmos os vertices -> (0,0) (1,0) (0,1)
+            //Os vertices seriam então:
+            //Vertice 0: { 0: (0,0)}
+            //Vertice 1: { 0: (1,0)}
+            //Vertice 2: { 0: (0,1)}
+            //onde 0 é o primeiro atributo denominado por positionAttribIndex
+        }
+
+        function setupHowToDraw(){
+            return null;
+        }
+
+        function draw(){
+            console.log("works");
+        }
+
+        function helloDraw(){
+            setupWebgl();
+            setupWhatToDraw();
+            setupHowToDraw();
+            draw();
+        }
+
+        window.onload = helloDraw;
+    </script>
+    </head>
+    <body>
+        <canvas
+        id = "OUTPUT-CANVAS"
+        width = " 500 px"
+        height = "500 px"
+        style = " border : 1px solid black ">
+        </canvas>
+    </body>
+ </html>
