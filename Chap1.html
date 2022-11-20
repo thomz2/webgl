@@ -2,12 +2,12 @@
     <head>
     <script>
         
-        let g1 = null;
+        let gl = null;
         let positionAttribIndex = 0;
 
         function setupWebgl (){
             let canvas = document.getElementById("OUTPUT-CANVAS");
-            g1 = canvas.getContext("webgl");
+            gl = canvas.getContext("webgl");
         }
 
         function setupWhatToDraw(){
@@ -27,7 +27,7 @@
             
             //Seta a referência do arraybuffer do gl para o positions buffer
             //Significa que qualquer operação posterior sobre o gl.Array_buffer é na verdade sobre o positions buffer
-            gl.bindBuffer (gl.ARRAY_BUFFER , positionsBuffer ) ;
+            gl.bindBuffer (gl.ARRAY_BUFFER , positionBuffer ) ;
 
             //Transferimos os dados de typedPositions para o ArrayBuffer
             //Como ele guarda a referência para o positionsBuffer, na verdade estamos alterando este último
@@ -108,13 +108,15 @@
 
              //Liga esse programa ao contexto do webgl
              gl. linkProgram ( program );
-             
+
              //Executa o programa guardado no contexto
              gl. useProgram ( program );
         }
 
         function draw(){
-            console.log("works");
+            gl. clearColor (0.0, 0.0, 0.0, 1.0);
+            gl. clear (gl. COLOR_BUFFER_BIT );
+            gl. drawArrays (gl. TRIANGLES , 0, 3);
         }
 
         function helloDraw(){
