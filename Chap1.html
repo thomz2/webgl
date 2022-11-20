@@ -56,7 +56,61 @@
         }
 
         function setupHowToDraw(){
-            return null;
+
+            // vertex shader -> Um pseudo-código a ser compilado pelo gl como uma string
+            // Responsável por criar os vértices com seus atributos e depois passar para uma primitiva(Como um triângulo)
+            // Ele usa os pares do exemplo anterior (0,0), (1,0), (0,1)
+            // como variáveis para modificar a posição do vértice( gl_position, um vetor de 4 dimensões x y z w)
+            // A partir do atributo aPosition, que é ligado ao atributo de índice 0 quando formos configurar o programa
+            let vsSource = "\
+             attribute vec2 aPosition ;                     \n\
+                                                            \n\
+             void main ( void )                             \n\
+             {                                              \n\
+             gl_Position = vec4 ( aPosition , 0.0, 1.0) ;   \n\
+             }                                              \n\
+             ";
+            
+             //Cria o objeto que vai armazenar o pseudo-código
+             var vertexShader = gl. createShader (gl. VERTEX_SHADER ) ;
+             //Copia as o pseudo-código para o objeto
+             gl. shaderSource ( vertexShader , vsSource );
+             //Compila o pseudo-código no objeto
+             gl. compileShader ( vertexShader ) ;
+
+             // fragment shader -> Um pseudo-código a ser compilado pelo gl como uma string
+             // Responsável por colorir as primitivas. Nesse caso, retorna sempre a cor azul
+             var fsSource = 
+             "\
+             void main ( void )                                                 \n\
+             {                                                                  \n\
+             gl_FragColor = vec4 (0.0, 1.0, 0.0, 1.0) ;                         \n\
+             }                                                                  \n\ ";
+             
+             //Cria o objeto que vai armazenar o pseudo-código
+             var fragmentShader = gl. createShader (gl. FRAGMENT_SHADER );
+             //Copia as o pseudo-código para o objeto
+             gl. shaderSource ( fragmentShader , fsSource );
+             //Compila o pseudo-código no objeto
+             gl. compileShader ( fragmentShader );
+         
+             // program -> cria uma instância para rodar o código encapsulado nos dois ultimos objetos
+             var program = gl. createProgram ();
+
+             // Liga os shaders ao programa
+             gl. attachShader ( program , vertexShader ) ;
+             gl. attachShader ( program , fragmentShader );
+
+             //Lembra no começo dessa função que o vertexShader usava os valores guardados no aPosition?
+             //Substituímos todas as instâncias de atributo 0 pelo aPosition
+             //Assim, o vertexShader consegue um vértice v = {0:(0,1)}  e lê como { aPosition : (0,1) }
+             gl. bindAttribLocation ( program , positionAttribIndex ," aPosition ");
+
+             //Liga esse programa ao contexto do webgl
+             gl. linkProgram ( program );
+             
+             //Executa o programa guardado no contexto
+             gl. useProgram ( program );
         }
 
         function draw(){
