@@ -100,6 +100,64 @@ NVMCClient.createObjectBuffers = function (gl, obj) {
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, edges, gl.STATIC_DRAW);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 };
+
+//O shader a ser usado -> retorna o programa linkado ao shader de vértices e fragmentos
+uniformShader = function (gl) {
+
+    //Pseudo código para o shader do vértice -> desenha os vertices nas suas posições
+    //Proximo passo cria as arestas
+    var vertexShaderSource = `
+
+    uniform mat4 uModelViewMatrix ; 
+    uniform mat4 uProjectionMatrix ; 
+    attribute vec3 aPosition ; 
+
+    void main ( void ) 
+    { 
+        gl_Position = uProjectionMatrix * 
+        uModelViewMatrix * vec4 ( aPosition , 1.0) ; 
+    } 
+    `;
+    //Pseudo código para o shader de fragmentos -> pinta com a cor
+    var fragmentShaderSource = `
+    precision highp float ; 
+    uniform vec4 uColor ; 
+    void main ( void ) 
+    { 
+        gl_FragColor = vec4 ( uColor ); 
+    } 
+    `;
+    // create the vertex shader
+    var vertexShader = gl. createShader (gl. VERTEX_SHADER ) ;
+    gl. shaderSource ( vertexShader , vertexShaderSource );
+    gl. compileShader ( vertexShader ) ;
+    // create the fragment shader
+    var fragmentShader = gl. createShader (gl. FRAGMENT_SHADER );
+    gl. shaderSource ( fragmentShader , fragmentShaderSource );
+    gl. compileShader ( fragmentShader )
+
+    // O atributo de posição tem indice 0
+    var aPositionIndex = 0;
+
+    // Create the shader program
+    var shaderProgram = gl. createProgram ();
+    gl. attachShader ( shaderProgram , vertexShader );
+    gl. attachShader ( shaderProgram , fragmentShader );
+    gl. bindAttribLocation ( shaderProgram , aPositionIndex , "aPosition ");
+    gl. linkProgram ( shaderProgram );
+    // If creating the shader program failed , alert
+    if (! gl. getProgramParameter ( shaderProgram , gl. LINK_STATUS )) {
+        var str = " Unable to initialize the shader program ";
+        str += "VS : + gl. getShaderInfoLog ( vertexShader ) + ";
+        alert (str );
+    }
+    shaderProgram.aPositionIndex = aPositionIndex ;
+    shaderProgram.uModelViewMatrixLocation = gl.getUniformLocation(shaderProgram , " uModelViewMatrix ");
+    shaderProgram.uProjectionMatrixLocation = gl.getUniformLocation(shaderProgram , " uProjectionMatrix ");
+    shaderProgram.uColorLocation = gl.getUniformLocation (shaderProgram , " uColor ") ;
+
+    return shaderProgram ;
+};
   
 
 //Desenha os objetos
@@ -116,23 +174,34 @@ NVMCClient.drawObject = function (gl, obj, fillColor, lineColor) {
   //Nesse caso, vai de 3 em 3 floats começando do índice 0 e sem espaçamento
   gl.vertexAttribPointer(this.uniformShader.aPositionIndex, 3, gl.FLOAT, false, 0, 0);
 
+  //?
   gl.enable(gl.POLYGON_OFFSET_FILL);
 
   gl.polygonOffset(1.0, 1.0);
 
+  //Alguma operação interna levando em conta os índices dos vértices dos triângulos do objeto?
+  //Possivelmente o ELEMENT_ARRAY_BUFFER é usado para obter os índices dos triângulos
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.indexBufferTriangles);
+  //Algo relacionado ao modo de pintar ser pintar toda área do triângulo com a cor fillColor?
   gl.uniform4fv(this.uniformShader.uColorLocation, fillColor);
+  //Desenha os elementos, número de triângulos baseado na quantidade explicitada no objeto
   gl.drawElements(gl.TRIANGLES, obj.triangleIndices.length, gl.UNSIGNED_SHORT, 0);
 
   gl.disable(gl.POLYGON_OFFSET_FILL);
 
+  //Cor das linhas presumo, faz o setup delas
   gl.uniform4fv(this.uniformShader.uColorLocation, lineColor);
+  //Usa o buffer de elementos para referenciar os índices das arestas guardados no indexBufferEdges
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.indexBufferEdges);
+  //Desenha as linhas
   gl.drawElements(gl.LINES, obj.numTriangles * 3 * 2, gl.UNSIGNED_SHORT, 0);
 
+  //Reseta o ponteiro para ele apontar para o null
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
+  //Retira o atributo aPositionIndex( que nesse shader tem índice 0)
   gl.disableVertexAttribArray(this.uniformShader.aPositionIndex);
+  //Reseta o ponteiro para ele apontar para o null
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 };
 
