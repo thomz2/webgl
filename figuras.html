@@ -1,0 +1,270 @@
+<html >
+    <head>
+    <script src="spidergl.js"></script>
+    <script>
+
+        SpiderGL.openNamespace();
+        let gl = null;
+        let positionAttribIndex = 0;
+
+        function initSGL() {
+            console.log("SpiderGL Version: " + SGL_VERSION_STRING);
+            let canvas = document.getElementById("OUTPUT-CANVAS");
+            gl = canvas.getContext("webgl");
+        }
+
+        function CanvasHandler() {};
+
+        CanvasHandler.prototype = { // this = CanvasHandler; ui = SGL UserInterface; this.ui.gl = WebGLRenderingContext = canvas.getContext("webgl")
+            onInitialize: function () {
+                initSGL();
+
+                var vsSource = "\
+                    precision highp float;                                  \n\
+                                                                            \n\
+                    attribute vec3 aPosition;                               \n\
+                    attribute vec3 aColor;                                  \n\
+                                                                            \n\
+                    uniform   mat4  uModelViewProjectionMatrix;             \n\
+                    uniform   float uColorCorrection;                       \n\
+                                                                            \n\
+                    varying   vec3 vColor;                                  \n\
+                                                                            \n\
+                    void main(void) {                                       \n\
+                        vColor = aColor * uColorCorrection;                 \n\
+                                                                            \n\
+                        gl_Position = uModelViewProjectionMatrix * vec4(aPosition, 1.0); \n\
+                    }                                                       \n\ ";
+        
+                var fsSource = "\
+                    precision highp float;                                 \n\
+                                                                            \n\
+                    varying   vec3 vColor;                                 \n\
+                                                                            \n\
+                    void main(void) {                                      \n\
+                        gl_FragColor = vec4(vColor, 1.0);                  \n\
+                    }                                                      \n\ ";
+        
+                // inicializando shaders como objetos
+                var vShader = new SglVertexShader(gl, {source: vsSource});
+                var fShader = new SglFragmentShader(gl, {source: fsSource});
+        
+/*
+handle	   - the WebGL program, that if present will be used, together to his attached shaders, as the wrapped WebGLProgram (otherwise a new one will be created);
+autoLink   - a flag that, if true, enables the program to be linked automatically (whenever shaders are added or removed, or vertex attribute indices change);
+shaders	   - the array of SpiderGL shader objects to attach to the program;
+attributes - the object where each property has the name of a vertex shader attribute and whose value is the attribute index to wich the vertex attribute will be bound;
+uniforms   - the object where each property has the name of a uniform variable and whose value is the uniform default value.
+*/
+        
+                this.shaderProgram = new SglProgram(gl, {
+                    autoLink: true,
+                    shaders: [vShader, fShader],
+                    attributes: {
+                        aPosition: 0,
+                        aColor: 1
+                    },
+                    uniforms: {
+                        uModelViewProjectionMatrix: SglMat4.identity(),
+                        uColorCorrection: 1.5
+                    }
+                });
+
+                // CONFIGURANDO FIGURAS (e inicializando buffers)
+                var triangleVertices = [
+                        0.0, 1.0, 0.0,
+                       -1.0,-1.0, 0.0,
+                        1.0,-1.0, 0.0
+                ];
+        
+                var triangleColors = [
+                    1.0, 0.0, 0.0, // R
+                    0.0, 1.0, 0.0, // G
+                    0.0, 0.0, 1.0  // B
+                ];
+        
+/*
+handle	-	the WebGL buffer, that if provided will be wrapped and used together to his size and usage attributes (otherwise a new internal buffer will be created);
+data	-	the buffer content to be set (if present, the data will be set both if a handle is provided or internally created);
+size	-	the buffer size to be set (if present, it will be set both if a handle is provided or internally created, moreover if data parameter is present, the size field will be ignored);
+usage	-	the WebGL buffer usage hint parameter;
+*/
+        
+                this.triangleVertexPositionBuffer = new SglVertexBuffer(gl, {
+                    data: new Float32Array(triangleVertices),
+                    usage: gl.STATIC_DRAW
+                });
+        
+                this.triangleVertexColorBuffer = new SglVertexBuffer(gl, {
+                    data: new Float32Array(triangleColors),
+                    usage: gl.STATIC_DRAW
+                });
+        
+                // configuracao do triangulo 'pronta'
+        
+                var squareVerticesAndColors = [
+                        1.0, 1.0, 0.0, // v1 pos
+                        0.3, 0.3, 1.0, // v1 color
+                       -1.0, 1.0, 0.0, // v2 pos
+                        0.3, 0.3, 1.0, // v2 color
+                        1.0,-1.0, 0.0, // v3 pos
+                        0.3, 0.3, 1.0, // v3 color
+                       -1.0,-1.0, 0.0, // v4 pos
+                        0.3, 0.3, 1.0, // v4 color
+                ];
+        
+                this.squareVertexPositionColorBuffer = new SglVertexBuffer(gl, {
+                    data : new Float32Array(squareVerticesAndColors),
+                    usage: gl.STATIC_DRAW
+                });
+        
+                // configuracao do quadrado com um unico array contendo a posicao e as cores
+        
+                // DUVIDA
+                var squareIndices = [
+                    0, 1, 2,
+                    1, 2, 3
+                ];
+        
+                this.squareVertexIndexBuffer = new SglIndexBuffer(gl, {
+                    data: new Uint16Array(squareIndices),
+                    usage: gl.STATIC_DRAW
+                });
+            },
+            
+            onDraw: function() {
+                
+                var w = this.ui.width;
+                var h = this.ui.height;
+
+                gl.clearColor(0.2, 0.2, 0.6, 1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.clear(gl.DEPTH_BUFFER_BIT);
+                gl.clear(gl.STENCIL_BUFFER_BIT);
+                gl.viewport(0, 0, w, h);
+                gl.enable(gl.DEPTH_TEST);
+// After this initialization, the uniform variable "uModelViewProjectionMatrix" of the vertex shader is set up.
+// This variable refers to the model view projection matrix and, in general, 
+// it needs to be updated each time the "onDraw" is called to account for changes in view settings of the scene 
+// (perspective projection type, position of the observer camera, position of the model, etc.)
+
+                this.shaderProgram.bind();
+
+                // parte de algebra linear, procurar estudar depois
+                var pMatrix = SglMat4.perspective(sglDegToRad(45.0),w/h,0.1,10.0);
+                var mvMatrix = SglMat4.translation([-1.5, 0.0, -5.0]);
+                var mvpMatrix = SglMat4.mul(pMatrix, mvMatrix);
+                
+                this.shaderProgram.setUniforms({
+                    uModelViewProjectionMatrix: mvpMatrix
+                });
+                
+                this.triangleVertexPositionBuffer.vertexAttribPointer({
+                    index: 0, // o indice do atributo selecionado no construtor (no caso 0 para o atributo da posicao)
+                    size: 3, // acredito que cada vertica do triangulo seja definido por 3 valores (x, y, z)
+                    glType: gl.FLOAT, // o tipo base do atributo (nesse caso float)
+                    normalized: false, // a boolean value, true if the attribute has an integer type and must be normalized (false by default, even if it would not be necessary to normalize in our example);
+                    stride: 0, // os bytes do começo de um elemento e o começo do proximo (nesse caso o valor especial 0 indica que os valores são adjacentes)
+                    offset: 0, // o offset (em bytes) do começo do buffer (0 nesse caso pois o primeiro elemento útil eh o primeiro do buffer)
+                    enable: true // ativar o array de atributos do vertice no primeiro indice especificado
+                });
+                
+                this.triangleVertexColorBuffer.vertexAttribPointer({
+                    index: 1, // ind 1 = atributo da cor
+                    size: 3,
+                    glType: gl.FLOAT,
+                    normalized: false,
+                    stride: 0,
+                    offset: 0,
+                    enable: true
+                });
+
+                
+                // Once this is done, all the attributes related to the triangle we want to render are latched with the rights buffers,
+                // so you can pass to the next step: draw!
+                
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+                // primitiva: triangulo
+                // indice inicial = 0; numero de items a serem desenhados = 3
+                
+                // WebGL processa os dados que foram passados anteriormente na forma de atributos e variaveis uniformes e passa para os shaders.
+                // os vertices do triangulo sao desenhados no canvas (um pouco na esquerda por causa da operacao de translacao feita no 'model view projection matrix')
+                // com suas relativas cores diferentes (linearmente interpoladas na area do triangulo gracas a variavel 'color varying' colocada nos shaders)
+                
+                // segunda parte de algebra linear, procurar estudar depois
+                SglMat4.translate$(mvMatrix, [3.0, 0.0, 0.0]); // permite desenhar o quadrado um pouco pra direita do canvas
+                mvpMatrix = SglMat4.mul(pMatrix, mvMatrix);
+                
+                this.shaderProgram.setUniforms({
+                    uModelViewProjectionMatrix: mvpMatrix
+                });
+                
+                // CHECKPOINT
+                // stride e offset serao usados (procurar entender)
+                this.squareVertexPositionColorBuffer.vertexAttribPointer({
+                    index: 0,
+                    size: 3,
+                    glType: gl.FLOAT,
+                    normalized: false,
+                    stride: 6 * SGL_SIZEOF_FLOAT32,
+                    offset: 0,
+                    enable: true
+                });
+                
+                this.squareVertexPositionColorBuffer.vertexAttribPointer({
+                    index: 1,
+                    size: 3,
+                    glType: gl.FLOAT,
+                    normalized: false,
+                    stride: 6 * SGL_SIZEOF_FLOAT32, // space from the first element of one set of color RGB value and the next
+                    offset: 3 * SGL_SIZEOF_FLOAT32, // memoria ocupada por 3 elems (corresponding to the space from the beginning of the buffer and the first element of the first set of color RGB value)
+                    enable: true
+                });
+                
+                // duvida: pq stride = 6 * SGL_SIZEOF_FLOAT32?
+                // resposta: "stride" equals to the memory amount (in bytes) taken up by six elements (three spatial coordinates and three color values) corresponding to the space from the first element of one set of position value and the next.
+                
+                // conclusoes:
+                // stride = espaço entre as coisas OK
+                // offset = espaço antes da primeira ocorrencia OK
+                
+                this.squareVertexIndexBuffer.drawElements({
+                    glMode: gl.TRIANGLES, // primitiva usada
+                    count: 6, // dois triangulos = 2*3 = 6 vertices para ser desenhados
+                    glType: gl.UNSIGNED_SHORT, // index base type
+                    offset: 0 
+                });
+
+                this.shaderProgram.unbind();
+
+                gl.disable(gl.DEPTH_TEST);
+            }
+        }
+        
+        sglHandleCanvasOnLoad("OUTPUT-CANVAS", new CanvasHandler());
+
+        // focus = elemento ativo no documento
+        function focuson() {
+            document.getElementById("OUTPUT-CANVAS").focus();
+        }
+
+        // innerHTML = descendentes de um elemento no html (nesse caso vazio)
+        function log(msg) { document.getElementById("log-text").innerHTML += msg + '\n'; }
+
+        window.onload = focuson;
+
+    </script>
+    </head>
+    <body>
+        <center>
+            <canvas
+            id = "OUTPUT-CANVAS"
+            width = " 800 px"
+            height = "420 px"
+            style = " border : 1px solid black ">
+            </canvas>
+            <br/><br/>
+            <textarea id="log-text" style="width:800px; height:200px; resize:none;" readonly></textarea>
+        </center>
+    </body>
+</html>
