@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebGl teste</title>
+        <meta charset="utf-8">
+
+    <script src="http://vcg.isti.cnr.it/spidergl/js/0.2.0/spidergl.js"></script>
+
+    <script src="./programa.js"></script>
+    <script src="./animate.js"></script>
+
+    <script>
+
+        function CanvasHandler() {};
+
+        CanvasHandler.prototype = programa;
+
+        sglHandleCanvasOnLoad("OUTPUT-CANVAS", new CanvasHandler());
+
+        // focus = elemento ativo no documento
+        function focuson() {
+            document.getElementById("OUTPUT-CANVAS").focus();
+        }
+
+        // innerHTML = descendentes de um elemento no html (nesse caso vazio)
+        function log(msg) { document.getElementById("log-text").innerHTML += msg + '\n'; }
+
+        window.onload = focuson;
+
+        Animate(programa);
+
+    </script>
+
+    </head>
+    <body>
+        <center>
+            <canvas
+            id = "OUTPUT-CANVAS"
+            width = " 800 px"
+            height = "420 px"
+            style = " border : 1px solid black ">
+            </canvas>
+            <br/><br/>
+            <textarea id="log-text" style="width:800px; height:200px; resize:none;" readonly></textarea>
+        </center>
+    </body>
+</html>
