@@ -1,5 +1,3 @@
-
-
 SpiderGL.openNamespace();
 let gl = null;
 let positionAttribIndex = 0;
@@ -12,6 +10,8 @@ function initSGL() {
 }
 
 function setup(canvas){
+
+    let ativado = true;
 
     //Adiciona a capacidade de afastar, aproximar, mover para esquerda/direita/cima/baixo
     canvas.addEventListener("keydown", (event) => {
@@ -26,22 +26,19 @@ function setup(canvas){
         if(event.keyCode == 90)
         programa.translation[2] += 0.001
         if(event.keyCode == 88)
-        programa.translation[2] -= 0.001
-        if(event.keyCode == 13){
-        programa.figura = (programa.figura instanceof Cubo)? new Triangulo() : new Cubo();
-        }
+        programa.translation[2] -= 0.001    
     });
 
     //Mudança de figura com delay
-    canvas.addEventListener("keydown", ((ativado) => { return (event) => 
-        {
-            if(!ativado) return false;
-            ativado = false;
-            if(event.keyCode == 13)
-            programa.figura = (programa.figura instanceof Cubo)? new Triangulo() : new Cubo();
-            setTimeout(function() { ativado = true; }, 1400);
-        }})(true));
+    canvas.addEventListener("keydown", (event) => {
+          if (!ativado) return false;
+          ativado = false;
+          setTimeout(function() { ativado = true; }, 150);
+          if(event.keyCode == 13)
+          programa.nextFigura();
+        });
 }
+
 
 let programa = {
 
@@ -101,7 +98,8 @@ let programa = {
 
         //Renderiza um cubo caso não haja figura disponível
         //Mudar aqui a figura inicial
-        this.figura = (this.figura == null)? new Cubo() : this.figura;
+
+        if(this.figura == null) this.createFiguras();
 
         this.figura.setupGraphics(gl);
 
@@ -139,6 +137,22 @@ let programa = {
         this.figura.desenhar();
 
         this.shaderProgram.unbind();
+    },
+
+    nextFigura: function(){
+        let indice = this.indice+1;
+
+        if(indice >= this.figuras.length) indice = 0;
+
+        this.figura = this.figuras[indice];
+
+        this.indice = indice;
+    },
+
+    createFiguras: function(){
+        this.figuras = [ new Cone(10), new Cubo(), new Triangulo(), new Cone(100), new Cone(1000), new Cilindro(10)];
+        this.indice = 0;
+        this.figura = this.figuras[0];
     }
 }
 
@@ -244,12 +258,31 @@ class Cubo extends Figura{
 
           //Consertar?
           this.colors = [
-            1.0, 1.0, 1.0, 1.0, // Front face: white
-            1.0, 0.0, 0.0, 1.0, // Back face: red
-            0.0, 1.0, 0.0, 1.0, // Top face: green
-            0.0, 0.0, 1.0, 1.0, // Bottom face: blue
-            1.0, 1.0, 0.0, 1.0, // Right face: yellow
-            1.0, 0.0, 1.0, 1.0, // Left face: purple
+            1.0, 0.0, 0.0, // R
+            0.0, 0.0, 1.0, // B
+            0.0, 1.0, 0.0, // G
+            1.0, 1.0, 1.0, // W
+            0.0, 0.0, 1.0, // B
+            1.0, 0.0, 0.0, // R
+            0.0, 0.0, 1.0, // B
+            1.0, 0.0, 0.0, // R
+            1.0, 0.0, 0.0, // R
+            1.0, 1.0, 1.0, // W
+            0.0, 1.0, 0.0, // G
+            0.0, 0.0, 1.0, // B
+            1.0, 0.0, 0.0, // R
+            1.0, 1.0, 1.0, // W
+            0.0, 1.0, 0.0, // G
+            0.0, 0.0, 1.0, // B
+            1.0, 0.0, 0.0, // R
+            0.0, 0.0, 1.0, // B
+            0.0, 1.0, 0.0, // G
+            0.0, 0.0, 1.0, // B
+            0.0, 0.0, 1.0, // B
+            1.0, 0.0, 0.0, // R
+            1.0, 1.0, 1.0, // W
+            1.0, 0.0, 0.0, // R
+
           ];
     }
 
@@ -262,14 +295,14 @@ class Cubo extends Figura{
 
     desenhar(){
     
-    // Tell WebGL which indices to use to index the vertices
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        // Tell WebGL which indices to use to index the vertices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
-    const vertexCount = 36;
-    const type = gl.UNSIGNED_SHORT;
-    const offset = 0;
+        const vertexCount = 36;
+        const type = gl.UNSIGNED_SHORT;
+        const offset = 0;
 
-    gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+        gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
 
 
@@ -332,4 +365,225 @@ class Cubo extends Figura{
       
         this.indexBuffer = indexBuffer;
       }
+}
+
+
+class Cone extends Figura{
+
+    constructor(resolution){
+
+        super();
+
+        this.resolution = resolution;
+
+        this.setupVertices(resolution);
+        this.setupColors();
+        this.initIndexBuffer();
+    }
+
+    setupVertices(resolution){
+
+        this.vertices = [];
+
+        // apex of the cone
+        this.vertices [0] = 0.0;
+        this.vertices [1] = 2.0;
+        this.vertices [2] = 0.0;
+        // base of the cone
+        var radius = 1.0;
+        var angle ;
+        var step = 6.283185307179586476925286766559 / resolution ;
+        var vertexoffset = 3;
+
+        for (var i = 0; i < resolution ; i ++) {
+            angle = step * i;
+            this.vertices [ vertexoffset ] = radius * Math.cos ( angle );
+            this.vertices [ vertexoffset +1] = 0.0;
+            this.vertices [ vertexoffset +2] = radius * Math.sin ( angle );
+            vertexoffset += 3;
+        }
+
+        this.vertices [ vertexoffset ] = 0.0;
+        this.vertices [ vertexoffset +1] = 0.0;
+        this.vertices [ vertexoffset +2] = 0.0;
+    }
+
+    setupColors(){
+        this.colors = [];
+
+        let i = 0;
+        for(let vertex of this.vertices){
+            this.colors[i++] = (vertex > 0)? (vertex < 1)? vertex : 1 : -vertex;
+
+            if(i%4 == 3)
+                this.colors[i++] = 1.0;
+        }
+    }
+
+    initIndexBuffer(){
+
+        let resolution = this.resolution;
+
+        let triangleIndices = [];
+        
+        // lateral surface
+        var triangleoffset = 0;
+        for (var i = 0; i < resolution ; i ++) {
+            triangleIndices [ triangleoffset ] = 0;
+            triangleIndices [ triangleoffset +1] = 1 + (i % resolution);
+            triangleIndices [ triangleoffset +2] = 1 + ((i +1) % resolution );
+            triangleoffset += 3;
+        }
+
+        for (var i = 0; i < resolution ; i ++) {
+            triangleIndices [ triangleoffset ] = resolution +1;
+            triangleIndices [ triangleoffset +1] = 1 + (i % resolution);
+            triangleIndices [ triangleoffset +2] = 1 + ((i +1) % resolution);
+            triangleoffset += 3;
+        }
+
+        let indexBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(triangleIndices), gl.STATIC_DRAW);
+
+        this.indexBuffer = indexBuffer;
+    }
+
+    desenhar(){
+
+        // Tell WebGL which indices to use to index the vertices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+
+        const vertexCount = 6*this.resolution;
+        const type = gl.UNSIGNED_SHORT;
+        const offset = 0;
+
+        gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+    }
+
+    
+}
+
+class Cilindro extends Figura{
+
+    constructor(resolution){
+
+        super();
+
+        this.resolution = resolution;
+
+        this.setupVertices(resolution);
+        this.setupColors();
+        this.initIndexBuffer();
+    }
+
+    setupVertices(resolution){
+
+        this.vertices = [];
+
+        // base of the cone
+        var radius = 1.0;
+        var angle ;
+        var step = 6.283185307179586476925286766559 / resolution ;
+        var vertexoffset = 0;
+
+        for (var i = 0; i < resolution ; i ++) {
+            angle = step * i;
+            this.vertices [ vertexoffset ] = radius * Math.cos ( angle );
+            this.vertices [ vertexoffset +1] = 0.0;
+            this.vertices [ vertexoffset +2] = radius * Math.sin ( angle );
+            vertexoffset += 3;
+        }
+
+        // upper circle
+        for (var i = 0; i < resolution ; i ++) {
+            angle = step * i;
+            this . vertices [ vertexoffset ] = radius * Math . cos ( angle );
+            this . vertices [ vertexoffset +1] = 2.0;
+            this . vertices [ vertexoffset +2] = radius * Math . sin ( angle );
+            vertexoffset += 3;
+        }
+        
+        this.vertices [ vertexoffset ] = 0.0;
+        this.vertices [ vertexoffset +1] = 0.0;
+        this.vertices [ vertexoffset +2] = 0.0;
+
+        vertexoffset += 3;
+        this . vertices [ vertexoffset ] = 0.0;
+        this . vertices [ vertexoffset +1] = 2.0;
+        this . vertices [ vertexoffset +2] = 0.0;
+
+
+
+    }
+
+    setupColors(){
+        this.colors = [];
+
+        let i = 0;
+        for(let vertex of this.vertices){
+            this.colors[i++] = (vertex > 0)? (vertex < 1)? vertex : 1 : -vertex;
+
+            if(i%4 == 3)
+                this.colors[i++] = 1.0;
+        }
+    }
+
+    initIndexBuffer(){
+
+        let resolution = this.resolution;
+
+        let triangleIndices = [];
+        
+        // lateral surface
+        var triangleoffset = 0;
+        for (var i = 0; i < resolution ; i ++){
+            triangleIndices [ triangleoffset ] = i;
+            triangleIndices [ triangleoffset +1] = (i+1) % resolution ;
+            triangleIndices [ triangleoffset +2] = (i % resolution ) + resolution ;
+            triangleoffset += 3;
+            triangleIndices [ triangleoffset ] = (i % resolution ) + resolution ;
+            triangleIndices [ triangleoffset +1] = (i+1) % resolution ;
+            triangleIndices [ triangleoffset +2] = ((i +1) % resolution) + resolution ;
+            triangleoffset += 3;
+        }
+        // bottom of the cylinder
+        for (var i = 0; i < resolution ; i ++){
+            triangleIndices [ triangleoffset ] = i;
+            triangleIndices [ triangleoffset +1] = (i+1) % resolution ;
+            triangleIndices [ triangleoffset +2] = 2* resolution ;
+            triangleoffset += 3;
+        }
+        // top of the cylinder
+        for (var i = 0; i < resolution ; i ++){
+            triangleIndices [ triangleoffset ] = resolution + i;
+            triangleIndices [ triangleoffset +1] = ((i +1) % resolution) + resolution ;
+            triangleIndices [ triangleoffset +2] = 2* resolution +1;
+            triangleoffset += 3;
+        }
+
+        let indexBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(triangleIndices), gl.STATIC_DRAW);
+
+        this.indexBuffer = indexBuffer;
+    }
+
+    desenhar(){
+
+        // Tell WebGL which indices to use to index the vertices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+
+        const vertexCount = 12*this.resolution;
+        const type = gl.UNSIGNED_SHORT;
+        const offset = 0;
+
+        gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+    }
+
+    
 }
