@@ -13,6 +13,8 @@ function Animate(programa){
         squareRotation += deltaTime;
 
         programa.rotation = SglMat4.rotationAngleAxis(squareRotation, [0.0, 1.0, 0.0]);
+        programa.rotation = SglMat4.mul(SglMat4.rotationAngleAxis(squareRotation, [1.0, 0.0, 1.0]), programa.rotation);
+        programa.rotation = SglMat4.mul(SglMat4.rotationAngleAxis(squareRotation, [1.0, 1.0, 1.0]), programa.rotation);
 
         programa.onInitialize();
         programa.onDraw();   
