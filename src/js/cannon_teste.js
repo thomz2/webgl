@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
+import * as dat from 'dat.gui';
 import CannonDebugger from 'cannon-es-debugger';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -14,7 +15,6 @@ document.body.appendChild(renderer.domElement);
 const textureLoader = new THREE.TextureLoader();
 const cubeTextureLoader = new THREE.CubeTextureLoader();
 
-
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
@@ -28,13 +28,38 @@ const orbit = new OrbitControls(camera, renderer.domElement);
 
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
-    
+
 scene.background = new THREE.Color("rgb(23, 247, 255)");
 // scene.background = new THREE.Color(0xffffff);
 
 camera.position.set(0, 2, 50);
 
 orbit.update();
+
+var maxForce = 10;
+var maxSteerVal = Math.PI / 8;
+
+const options = {
+    boxMass: 0.3,
+    sphereMass: 1,
+    wheelForce: 10,
+    wheelSteer: Math.PI / 8
+};
+
+function attOptions() {
+    boxBody.mass = options.boxMass;
+    sphereBody.mass = options.sphereMass;
+    maxForce = options.wheelForce;
+    maxSteerVal = options.wheelSteer;
+}
+
+gui = new dat.GUI();
+
+gui.add(options, 'boxMass', 0.1, 2);
+gui.add(options, 'sphereMass', 0.1, 2);
+gui.add(options, 'wheelForce', 5, 30);
+gui.add(options, 'wheelSteer', Math.PI / 16, Math.PI / 2);
+
 
 const boxGeo = new THREE.BoxGeometry(2, 2, 2);
 const boxMat = new THREE.MeshBasicMaterial({
@@ -77,8 +102,8 @@ groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 
 const boxBody = new CANNON.Body({
     shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)),
-    mass: 1,
-    position: new CANNON.Vec3(1, 20, 0),
+    mass: options.boxMass,
+    position: new CANNON.Vec3(-10, 20, 10),
     material: new CANNON.Material()
 });
 world.addBody(boxBody);
@@ -97,7 +122,7 @@ world.addContactMaterial(groundBoxContactMat);
 const sphereBody = new CANNON.Body({
     shape: new CANNON.Sphere(2),
     mass: 1,
-    position: new CANNON.Vec3(0, 15, 0),
+    position: new CANNON.Vec3(10, 15, 0),
     material: new CANNON.Material()
 });
 
@@ -148,11 +173,8 @@ for (var i = 0; i < 4; ++i) {
     vehicle.wheelBodies[i].angularDamping = 0.4;
 }
 
+
 document.addEventListener('keydown', (e) => {
-
-    const maxSteerVal = Math.PI / 8;
-    const maxForce = 10;
-
     switch (e.key) {
         case 'w':
         case 'ArrowUp':
@@ -223,6 +245,8 @@ function animate() {
 
     sphereMesh.position.copy(sphereBody.position);
     sphereMesh.quaternion.copy(sphereBody.quaternion);
+
+    attOptions();
 
     renderer.render(scene, camera);
 }
