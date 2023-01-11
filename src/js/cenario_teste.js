@@ -1,13 +1,12 @@
 import * as THREE from 'three';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 
-import nekopuci from '../img/nekopuci.png';
 import nebula from '../img/nebula.jpg';
 import stars from '../img/stars.jpg';
-import bolsonaro from '../img/bolsonaro_rosto.png';
+import texturaplaneta from '../img/planetaearthlike.jpg';
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGL1Renderer();
 
 renderer.setSize(innerWidth, innerHeight);
 
@@ -20,11 +19,11 @@ const textureLoader = new THREE.TextureLoader();
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
-    75,
+    45,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
-    );
+);
 
 const orbit = new OrbitControls(camera, renderer.domElement);
 
@@ -35,8 +34,8 @@ camera.position.set(1, 2, 5);
 
 const boxGeometry = new THREE.BoxGeometry(2, 2, 2);
 const boxMaterial = new THREE.MeshStandardMaterial({
-    color: 0xFF0000,
-    map: textureLoader.load(nekopuci)
+    color: 0x0000FF,
+    map: textureLoader.load(nebula)
 });
 const box = new THREE.Mesh(boxGeometry, boxMaterial);
 
@@ -61,7 +60,7 @@ scene.add(gridHelper);
 const sphereGeometry = new THREE.SphereGeometry(4, 30, 30);
 const sphereMaterial = new THREE.MeshStandardMaterial({
     wireframe: false,
-    map: textureLoader.load(bolsonaro)
+    map: textureLoader.load(texturaplaneta)
 });
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 scene.add(sphere);
@@ -135,28 +134,34 @@ const plane2Material = new THREE.ShaderMaterial({
     `,
     uniforms: {
         u_time: {type: 'f', value: 0.0}
-
     }
 });
 const plane2 = new THREE.Mesh(plane2Geometry, plane2Material);
 scene.add(plane2);
 plane2.position.set(10, 10, 15);
 
-const s2VShader = `
-    void main() {
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-`;
-const s2FShader = `
-    void main () {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
-`;
-
 const sphere2Geometry = new THREE.SphereGeometry(4);
 const sphere2Material = new THREE.ShaderMaterial({
-    vertexShader: s2VShader,
-    fragmentShader: s2FShader
+    wireframe: true,
+    vertexShader: `
+        uniform float u_time;
+
+        void main() {
+            float newX = sin(position.x * u_time) * cos(position.y * u_time) * 5.0;
+            float newY = sin(position.y * u_time) * sin(position.z * u_time) * 5.0;
+            float newZ = cos(position.z * u_time) * cos(position.x * u_time) * 5.0;
+            vec3 newPosition = vec3(newX, newY, newZ);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+    `,
+    fragmentShader: `
+        void main () {
+            gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    `,
+    uniforms: {
+        u_time: {type: 'f', value: 0.0}
+    }
 });
 const sphere2 = new THREE.Mesh(sphere2Geometry, sphere2Material);
 scene.add(sphere2);
@@ -228,10 +233,11 @@ function animate(time) {
             intersects[i].object.material.color.set(0x00FF00);
             break;
         }
-        box.material.color.set(0xFF0000);
+        box.material.color.set(0x0000FF);
     }
 
     plane2.material.uniforms.u_time.value = clock.getElapsedTime();
+    sphere2.material.uniforms.u_time.value = clock.getElapsedTime() / 10;
 
     renderer.render(scene, camera);
 }
