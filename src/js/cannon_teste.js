@@ -12,6 +12,8 @@ renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
 const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+
 
 const scene = new THREE.Scene();
 
@@ -26,8 +28,12 @@ const orbit = new OrbitControls(camera, renderer.domElement);
 
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
+    
+scene.background = new THREE.Color("rgb(23, 247, 255)");
+// scene.background = new THREE.Color(0xffffff);
 
 camera.position.set(0, 2, 50);
+
 orbit.update();
 
 const boxGeo = new THREE.BoxGeometry(2, 2, 2);
@@ -110,7 +116,7 @@ const groundSphereContactMat = new CANNON.ContactMaterial(
 world.addContactMaterial(groundSphereContactMat);
 
 const cannonDebugger = new CannonDebugger(scene, world, {
-    // color: 0xff0000,
+    color: 0xffffff,
 });
 
 const carBody = new CANNON.Body({
@@ -123,6 +129,7 @@ const vehicle = new CANNON.RigidVehicle({
     chassisBody: carBody
 });
 
+// posicoes das rodas
 const positions = [
     new CANNON.Vec3(-2, 0, 2,5),
     new CANNON.Vec3(-2, 0, -2,5),
@@ -142,6 +149,7 @@ for (var i = 0; i < 4; ++i) {
 }
 
 document.addEventListener('keydown', (e) => {
+
     const maxSteerVal = Math.PI / 8;
     const maxForce = 10;
 
@@ -173,9 +181,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
-    // const maxSteerVal = Math.Pi / 8;
-    // const maxForce = 10;
-
     switch (e.key) {
         case 'w':
         case 'ArrowUp':
@@ -206,7 +211,6 @@ document.addEventListener('keyup', (e) => {
 vehicle.addToWorld(world);
 
 function animate() {
-    // olhar depois na doc 
     world.step(1 / 60);
     // world.fixedStep();
     cannonDebugger.update();
