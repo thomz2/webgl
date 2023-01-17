@@ -37,6 +37,8 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
+console.log(camera);
+
 const orbit = new OrbitControls(camera, renderer.domElement);
 
 camera.position.set(0, 20, -30);
@@ -239,10 +241,15 @@ document.addEventListener('keyup', (e) => {
             vehicle.setSteeringValue(0, 0);
             vehicle.setSteeringValue(0, 1);
             break;
+        case 'Enter':
+            camera.lockOn = !camera.lockOn;
+            break;
     }
 });
 
 const timeStep = 1 / 60;
+
+
 
 function animate() {
     world.step(timeStep);
@@ -257,6 +264,21 @@ function animate() {
     carro.roda2.quaternion.copy(vehicle.wheelBodies[1].quaternion);
     carro.roda3.quaternion.copy(vehicle.wheelBodies[2].quaternion);
     carro.roda4.quaternion.copy(vehicle.wheelBodies[3].quaternion);
+
+    console.log(camera.lockOn)
+
+    if(camera.lockOn){
+        camera.position.x = vehicle.chassisBody.position.x;
+        camera.position.y = vehicle.chassisBody.position.y + 10;
+        camera.position.z = vehicle.chassisBody.position.z - 10;
+    }
+
+    // const x = vehicle.wheelBodies[3].position.x + vehicle.wheelBodies[2].position.x;
+    // const y = vehicle.wheelBodies[3].position.y + vehicle.wheelBodies[2].position.y;
+    // const z = vehicle.wheelBodies[3].position.z + vehicle.wheelBodies[2].position.z;
+
+    // camera.lookAt(new THREE.Vector3(x/2,y/2,z/2));
+
 
     groundMesh.position.copy(groundBody.position);
     groundMesh.quaternion.copy(groundBody.quaternion);
