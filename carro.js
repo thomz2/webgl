@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {TTFLoader} from 'three/examples/jsm/loaders/TTFLoader';
+import {FontLoader} from 'three/examples/jsm/loaders/FontLoader';
+import {TextGeometry} from 'three/examples/jsm/geometries/TextGeometry'
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
@@ -37,8 +40,6 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
-console.log(camera);
-
 const orbit = new OrbitControls(camera, renderer.domElement);
 
 camera.position.set(0, 20, -30);
@@ -62,12 +63,13 @@ const sphereMat = new THREE.ShaderMaterial({
 const sphereMesh = new THREE.Mesh( sphereGeo, sphereMat);
 scene.add(sphereMesh);
 
-const groundGeo = new THREE.PlaneGeometry(30, 30);
+const groundGeo = new THREE.PlaneGeometry(300, 300);
 const groundMat = new THREE.MeshBasicMaterial({ 
-	color: 0xffffff,
 	side: THREE.DoubleSide,
-	wireframe: true 
+    wireframe: true
+    // map: pistaTextura
  });
+
 const groundMesh = new THREE.Mesh(groundGeo, groundMat);
 scene.add(groundMesh);
 
@@ -80,7 +82,7 @@ const groundPhysMat = new CANNON.Material();
 const groundBody = new CANNON.Body({
     //shape: new CANNON.Plane(),
     //mass: 10
-    shape: new CANNON.Box(new CANNON.Vec3(15, 15, 0.1)),
+    shape: new CANNON.Box(new CANNON.Vec3(150, 150, 0.1)),
     type: CANNON.Body.STATIC,
     material: groundPhysMat
 });
@@ -183,9 +185,9 @@ scene.add(carro.roda2);
 scene.add(carro.roda3);
 scene.add(carro.roda4);
 
-console.log(vehicle)
+console.log(carro.chassis)
 
-const maxForce = 100;
+const maxForce = 40;
 const maxSteerVal = Math.PI / 8;
 
 document.addEventListener('keydown', (e) => {
@@ -250,6 +252,52 @@ document.addEventListener('keyup', (e) => {
 const timeStep = 1 / 60;
 
 
+//Classe para a camera na terceira pessoa
+class ThirdPersonCamera {
+    constructor(params){
+        this._params = params;
+        this._camera = params.camera;
+
+        this._currentPosition = new THREE.Vector3();
+        this._currentLookAt = new THREE.Vector3();
+    }
+
+    _CalculateIdealOffset(){
+        const idealOffset = new THREE.Vector3(...this._params.position);
+        idealOffset.applyQuaternion(this._params.target.quaternion);
+        idealOffset.add(this._params.target.position);
+        return idealOffset;
+    }
+
+    _CalculateIdealLookAt(){
+        const idealLookAt = new THREE.Vector3(...this._params.lookAt);
+        idealLookAt.applyQuaternion(this._params.target.quaternion);
+        idealLookAt.add(this._params.target.position);
+        return idealLookAt;
+    }
+
+    Update(){
+        const idealOffset = this._CalculateIdealOffset();
+        const idealLookAt = this._CalculateIdealLookAt();
+
+        this._currentPosition.copy(idealOffset);
+        this._currentLookAt.copy(idealLookAt);
+
+        this._camera.position.copy(this._currentPosition);
+        this._camera.lookAt(this._currentLookAt)
+    }
+}
+
+//Instância da camera em terceira pessoa
+//Target é o alvo observado
+//Position é a posição em relação ao alvo, nesse caso atrás e em cima
+//LookAt é onde a camera aponta em relação ao alvo
+const thirdPerson = new ThirdPersonCamera({
+    camera: camera,
+    target: carro.chassis,
+    position: [20, 5, 0],
+    lookAt: [-25,0,0]
+});
 
 function animate() {
     world.step(timeStep);
@@ -265,13 +313,13 @@ function animate() {
     carro.roda3.quaternion.copy(vehicle.wheelBodies[2].quaternion);
     carro.roda4.quaternion.copy(vehicle.wheelBodies[3].quaternion);
 
-    console.log(camera.lockOn)
+    // console.log(camera.lockOn)
 
-    if(camera.lockOn){
-        camera.position.x = vehicle.chassisBody.position.x;
-        camera.position.y = vehicle.chassisBody.position.y + 10;
-        camera.position.z = vehicle.chassisBody.position.z - 10;
-    }
+    // if(camera.lockOn){
+    //     camera.position.x = vehicle.chassisBody.position.x;
+    //     camera.position.y = vehicle.chassisBody.position.y + 10;
+    //     camera.position.z = vehicle.chassisBody.position.z - 10;
+    // }
 
     // const x = vehicle.wheelBodies[3].position.x + vehicle.wheelBodies[2].position.x;
     // const y = vehicle.wheelBodies[3].position.y + vehicle.wheelBodies[2].position.y;
@@ -290,6 +338,8 @@ function animate() {
     sphereMesh.quaternion.copy(sphereBody.quaternion);
 
     renderer.render(scene, camera);
+
+    if(camera.lockOn) thirdPerson.Update();
 }
 
 renderer.setAnimationLoop(animate);
