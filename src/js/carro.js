@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
+import Race from './race';
+import {Track, Tree, Building} from './objetos.js';
+
+console.log(Track)
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
@@ -100,12 +104,28 @@ const groundGeo = new THREE.PlaneGeometry(300, 300);
 const groundMat = new THREE.MeshBasicMaterial({ 
 	side: THREE.DoubleSide,
     wireframe: true
-    // map: pistaTextura
  });
 
 const groundMesh = new THREE.Mesh(groundGeo, groundMat);
 scene.add(groundMesh);
 
+const pista = new THREE.Mesh(new Track(Race.track), new THREE.MeshBasicMaterial({color: 0xFF00F0, wireframe:true}));
+scene.add(pista);
+
+//Adciona as arvores
+Race.trees.map(arvore => {
+    const tree = new Tree(0.55, 4, 4); 
+    tree.position.set(...arvore.position); 
+    scene.add(tree)
+});
+
+//Adciona as construções
+Race.buildings.map(construcao =>{
+    scene.add(new THREE.Mesh(
+        new Building(construcao),
+        new THREE.MeshBasicMaterial({color: 0xFFFF00, wireframe:true})
+    ))
+});
 
 //Malhas do Threejs: malhas do carro
 const criarMaterial = () => new THREE.ShaderMaterial({uniforms:{}, vertexShader:VS, fragmentShader:FS2});
