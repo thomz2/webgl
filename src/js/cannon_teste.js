@@ -240,6 +240,30 @@ var maxForce = 40;
 var maxSteerVal = Math.PI / 8;
 
 
+Race.trees.map(arvore => {
+
+    const tree = new CANNON.Body({
+        mass: 0,
+        position: new CANNON.Vec3(...arvore.position).vadd(new CANNON.Vec3(0,2,0)),
+        material: boxPhysMat
+    });
+
+    tree.addShape(
+        new CANNON.Cylinder(0.55,0.55,4,20),
+        new CANNON.Vec3(0,0,0),
+        new CANNON.Quaternion()
+    );
+
+    tree.addShape(
+        new CANNON.Cylinder(0.01,5,16,20),
+        new CANNON.Vec3(0,10,0),
+        new CANNON.Quaternion()
+    );
+
+
+    world.addBody(tree);
+});
+
 //CAMERA EM TERCEIRA PESSOA
 class ThirdPersonCamera {
     constructor(params){
