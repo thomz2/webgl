@@ -314,24 +314,29 @@ const thirdPerson = new ThirdPersonCamera({
 //Listeners
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
+
+        case 'W':
         case 'w':
         case 'ArrowUp':
             vehicle.setWheelForce(maxForce, 0);
             vehicle.setWheelForce(maxForce, 1);
             break;
 
+        case 'S':
         case 's':
         case 'ArrowDown':
             vehicle.setWheelForce(-maxForce / 2, 0);
             vehicle.setWheelForce(-maxForce / 2, 1);
             break;
     
+        case 'A':
         case 'a':
         case 'ArrowLeft':
             vehicle.setSteeringValue(maxSteerVal, 0);
             vehicle.setSteeringValue(maxSteerVal, 1);
             break;
 
+        case 'D':
         case 'd':
         case 'ArrowRight':
             vehicle.setSteeringValue(-maxSteerVal, 0);
@@ -342,29 +347,34 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('keyup', (e) => {
     switch (e.key) {
+        case 'W':
         case 'w':
         case 'ArrowUp':
             vehicle.setWheelForce(0, 0);
             vehicle.setWheelForce(0, 1);
             break;
-
+        
+        case 'S':
         case 's':
         case 'ArrowDown':
             vehicle.setWheelForce(0, 0);
             vehicle.setWheelForce(0, 1);
             break;
     
+        case 'A':
         case 'a':
         case 'ArrowLeft':
             vehicle.setSteeringValue(0, 0);
             vehicle.setSteeringValue(0, 1);
             break;
 
+        case 'D':
         case 'd':
         case 'ArrowRight':
             vehicle.setSteeringValue(0, 0);
             vehicle.setSteeringValue(0, 1);
             break;
+
         case 'Enter':
             camera.lockOn = !camera.lockOn;
             break;
