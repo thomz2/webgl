@@ -32,14 +32,14 @@ export class Track extends THREE.BufferGeometry{
 
         var triangleoffset = 0;
         for (var i=0; i< nv ; ++i) {
-            this.triangleIndices[triangleoffset + 0] = i ; 
+            this.triangleIndices[triangleoffset + 2] = i ; 
             this.triangleIndices[triangleoffset + 1] = (i + 1)%nv;
-            this.triangleIndices[triangleoffset + 2] = nv + (i+1) %nv;
+            this.triangleIndices[triangleoffset + 0] = nv + (i+1) %nv;
             triangleoffset += 3;
 
-            this.triangleIndices[triangleoffset + 0] = i ;
+            this.triangleIndices[triangleoffset + 2] = i ;
             this.triangleIndices[triangleoffset + 1] = nv + (i+1) %nv;
-            this.triangleIndices[triangleoffset + 2] =nv + i;
+            this.triangleIndices[triangleoffset + 0] =nv + i;
             triangleoffset += 3;
         }
 
@@ -69,14 +69,14 @@ export class Tree extends THREE.Group{
         
         const tronco = new THREE.Mesh(
                             new THREE.CylinderGeometry(radius,radius,height,32), 
-                            new THREE.MeshBasicMaterial({color: 0x00f0f0})
+                            new THREE.MeshPhongMaterial({color: 0x725c42})
                         );
 
-        tronco.position.set(0,height/2,0)
+        tronco.position.set(0,height/2,0);
 
         const folhas = new THREE.Mesh(
             new THREE.ConeGeometry(radius*ratio*2,height*ratio,32), 
-            new THREE.MeshBasicMaterial({color: 0x00f0f0})
+            new THREE.MeshPhongMaterial({color: 0x3A5F0B})
         ); 
         
         folhas.position.set(0,height*(ratio/2+1),0);
@@ -87,81 +87,81 @@ export class Tree extends THREE.Group{
     }
 }
 
-// function CircularStreet(resolution, width) {
+function CircularStreet(resolution, width) {
 
-// 	this.name = "circular street";
+	this.name = "circular street";
 
-// 	// vertices definition
-// 	////////////////////////////////////////////////////////////
+	// vertices definition
+	////////////////////////////////////////////////////////////
 	
-// 	this.vertices = new Float32Array(3*2*resolution);
+	this.vertices = new Float32Array(3*2*resolution);
 	
-// 	var radius = 100.0;
-// 	var angle;
-// 	var step = 6.283185307179586476925286766559 / resolution;
+	var radius = 100.0;
+	var angle;
+	var step = 6.283185307179586476925286766559 / resolution;
 	
-// 	// inner circle
-// 	var vertexoffset = 0;
-// 	for (var i = 0; i < resolution; i++) {
+	// inner circle
+	var vertexoffset = 0;
+	for (var i = 0; i < resolution; i++) {
 	
-// 		angle = step * i;
+		angle = step * i;
 		
-// 		this.vertices[vertexoffset] = (radius-width/2.0) * Math.cos(angle);
-// 		this.vertices[vertexoffset+1] = 0.0;
-// 		this.vertices[vertexoffset+2] = (radius-width/2.0) * Math.sin(angle);
-// 		vertexoffset += 3;
-// 	}
+		this.vertices[vertexoffset] = (radius-width/2.0) * Math.cos(angle);
+		this.vertices[vertexoffset+1] = 0.0;
+		this.vertices[vertexoffset+2] = (radius-width/2.0) * Math.sin(angle);
+		vertexoffset += 3;
+	}
 	
-// 	// outer circle
-// 	for (var i = 0; i < resolution; i++) {
+	// outer circle
+	for (var i = 0; i < resolution; i++) {
 	
-// 		angle = step * i;
+		angle = step * i;
 		
-// 		this.vertices[vertexoffset] = (radius+width/2.0) * Math.cos(angle);
-// 		this.vertices[vertexoffset+1] = 0.0;
-// 		this.vertices[vertexoffset+2] = (radius+width/2.0) * Math.sin(angle);
-// 		vertexoffset += 3;
-// 	}
+		this.vertices[vertexoffset] = (radius+width/2.0) * Math.cos(angle);
+		this.vertices[vertexoffset+1] = 0.0;
+		this.vertices[vertexoffset+2] = (radius+width/2.0) * Math.sin(angle);
+		vertexoffset += 3;
+	}
 	
-// 	// triangles definition
-// 	////////////////////////////////////////////////////////////
+	// triangles definition
+	////////////////////////////////////////////////////////////
 	
-// 	this.triangleIndices = new Uint16Array(3*2*resolution);
+	this.triangleIndices = new Uint16Array(3*2*resolution);
 	
-// 	var triangleoffset = 0;
-// 	for (var i = 0; i < resolution; i++)
-// 	{
-// 		this.triangleIndices[triangleoffset] = i;
-// 		this.triangleIndices[triangleoffset+1] = i + resolution;
-// 		this.triangleIndices[triangleoffset+2] = (i+1) % resolution;
-// 		triangleoffset += 3;
+	var triangleoffset = 0;
+	for (var i = 0; i < resolution; i++)
+	{
+		this.triangleIndices[triangleoffset] = i;
+		this.triangleIndices[triangleoffset+1] = i + resolution;
+		this.triangleIndices[triangleoffset+2] = (i+1) % resolution;
+		triangleoffset += 3;
 		
-// 		this.triangleIndices[triangleoffset] = (i+1) % resolution;
-// 		this.triangleIndices[triangleoffset+1] = i + resolution;
-// 		this.triangleIndices[triangleoffset+2] = ((i+1) % resolution) + resolution;
-// 		triangleoffset += 3;
-// 	}
+		this.triangleIndices[triangleoffset] = (i+1) % resolution;
+		this.triangleIndices[triangleoffset+1] = i + resolution;
+		this.triangleIndices[triangleoffset+2] = ((i+1) % resolution) + resolution;
+		triangleoffset += 3;
+	}
 	
-// 	this.numVertices = this.vertices.length/3;
-// 	this.numTriangles = this.triangleIndices.length/3;
+	this.numVertices = this.vertices.length/3;
+	this.numTriangles = this.triangleIndices.length/3;
 
-//     const points = [];
+    const points = [];
 
-//     for(const index of this.triangleIndices){
+    for(const index of this.triangleIndices){
 
-//         const eixoX = this.vertices[index*3];
-//         const eixoY = this.vertices[index*3+ 1];
-//         const eixoZ = this.vertices[index*3 + 2];
+        const eixoX = this.vertices[index*3];
+        const eixoY = this.vertices[index*3+ 1];
+        const eixoZ = this.vertices[index*3 + 2];
 
-//         points.push(new THREE.Vector3(eixoX, eixoY, eixoZ));
-//     }
+        points.push(new THREE.Vector3(eixoX, eixoY, eixoZ));
+    }
 
-// 	const geometry = new THREE.BufferGeometry();
+	const geometry = new THREE.BufferGeometry();
 
-// 	geometry.setFromPoints(points);
+	geometry.setFromPoints(points);
 
-// 	return geometry;
-// }
+	return geometry;
+}
 
 export class Building extends THREE.BufferGeometry{
 
