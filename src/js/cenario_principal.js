@@ -4,7 +4,10 @@ import * as dat from 'dat.gui';
 import Race from './race';
 import {Track, Tree, Building} from './objetos.js';
 
-console.log(Track)
+import grass from '../../assets/grass.jpg';
+import space from '../../assets/space.jpeg';
+import sun from '../../assets/sun.jpg';
+import road from '../../assets/road.jpg';
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
@@ -12,7 +15,6 @@ import { Carro } from './classes/Car1';
 
 //Shaders
 const VS = `
-
 varying vec4 pos;
 varying vec3 v_normal;
 void main() {
@@ -69,6 +71,45 @@ gui.add(options, 'tamanhoCarro', 0.1, 1.5);
 gui.add({"Mudar Câmera": () => camera.lockOn = !camera.lockOn}, 'Mudar Câmera')
 gui.add({"Modo debug": () => options.debug = !options.debug}, 'Modo debug')
 
+
+
+//Luzes ambiente e direcional + Sol + background
+scene.add(new THREE.AmbientLight(0xfffff0,0.3));
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+
+directionalLight.castShadow = true;
+
+directionalLight.position.set(0, 100, 0);
+
+let t = new THREE.Object3D();
+t.translateX(100);
+t.translateY(100);
+t.translateZ(100);
+
+directionalLight.target = t;
+
+scene.add(directionalLight);
+scene.add(directionalLight.target);
+
+const Sun = new THREE.Mesh(
+                new THREE.SphereGeometry(10),
+
+                new THREE.MeshBasicMaterial({
+                    map: new THREE.TextureLoader().load(sun)
+                })
+);
+
+Sun.position.x = -100;
+Sun.position.y = 100;
+Sun.position.z = -100;
+
+
+scene.add(Sun);
+
+scene.background = new THREE.TextureLoader().load(space);
+
+
 //Malhas do Threejs
 const boxGeo = new THREE.BoxGeometry(2, 2, 2);
 const boxMat = new THREE.ShaderMaterial({
@@ -88,16 +129,21 @@ const sphereMat = new THREE.ShaderMaterial({
 const sphereMesh = new THREE.Mesh( sphereGeo, sphereMat);
 scene.add(sphereMesh);
 
+//Gramado da cena
 const groundGeo = new THREE.PlaneGeometry(300, 300);
+const texture = new THREE.TextureLoader().load(grass);
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set(5,5);
 const groundMat = new THREE.MeshBasicMaterial({ 
-	side: THREE.DoubleSide,
-    wireframe: true
+	map: texture
  });
 
 const groundMesh = new THREE.Mesh(groundGeo, groundMat);
 scene.add(groundMesh);
 
-const pista = new THREE.Mesh(new Track(Race.track), new THREE.MeshBasicMaterial({color: 0xFF00F0, wireframe:true}));
+const pista = new THREE.Mesh(new Track(Race.track), new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(road)}));
+pista.position.y = 0.1
 scene.add(pista);
 
 //Adciona as arvores
