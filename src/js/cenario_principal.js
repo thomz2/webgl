@@ -1,18 +1,22 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
-import {VertexNormalsHelper} from 'three/examples/jsm/helpers/VertexNormalsHelper';
+// import {VertexNormalsHelper} from 'three/examples/jsm/helpers/VertexNormalsHelper';
 import * as dat from 'dat.gui';
+import { Carro } from './classes/Car1';
+import { Tree } from './classes/Tree';
+import { Building } from './classes/Building';
+import { Track } from './classes/Track';
+import { ThirdPersonCamera } from './classes/ThirdPersonCamera';
+import { Sun} from './classes/Sun';
+
 import Race from './race';
-import {Track, Tree, Building} from './objetos.js';
 
 import grass from '../assets/grass.jpg';
 import space from '../assets/space.jpeg';
-import sun from '../assets/sun.jpg';
 import road from '../assets/road.jpg';
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
-import { Carro } from './classes/Car1';
 
 //Shaders
 const VS = `
@@ -74,40 +78,10 @@ gui.add(options, 'tamanhoCarro', 0.1, 1.5);
 gui.add({"Mudar Câmera": () => camera.lockOn = !camera.lockOn}, 'Mudar Câmera')
 gui.add({"Modo debug": () => options.debug = !options.debug}, 'Modo debug')
 
-
-
 //Luzes ambiente e direcional + Sol + background
 scene.add(new THREE.AmbientLight(0xfffff0,0.3));
 
-// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
-// directionalLight.castShadow = true;
-// directionalLight.position.set(0, 100, 0);
-
-const spotLight = new THREE.SpotLight(0xFFFFFF, 0.85);
-spotLight.angle = 0.7;
-scene.add(spotLight);
-spotLight.position.set(-200, 200, -200);
-spotLight.castShadow = true;
-
-const sLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(sLightHelper);
-
-const Sun = new THREE.Mesh(
-    new THREE.SphereGeometry(10),
-
-    new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load(sun)
-    })
-);
-
-Sun.position.x = -200;
-Sun.position.y = 200;
-Sun.position.z = -200;
-
-scene.add(Sun);
-
-// const helper = new THREE.CameraHelper( directionalLight.shadow.camera );
-// scene.add(helper);
+const sun = new Sun(scene, -200, 200, -200);
 
 scene.background = new THREE.TextureLoader().load(space);
 
@@ -157,10 +131,6 @@ pista.position.y = 0.1
 
 scene.add(pista);
 pista.receiveShadow = true;
-// pista.castShadow = true;
-
-
-// scene.add(helper);
 
 //Adciona as arvores
 Race.trees.map(arvore => {
@@ -270,42 +240,6 @@ Race.trees.map(arvore => {
 
     world.addBody(tree);
 });
-
-//CAMERA EM TERCEIRA PESSOA
-class ThirdPersonCamera {
-    constructor(params){
-        this._params = params;
-        this._camera = params.camera;
-        
-        this._currentPosition = new THREE.Vector3();
-        this._currentLookAt = new THREE.Vector3();
-    }
-    
-    _CalculateIdealOffset(){
-        const idealOffset = new THREE.Vector3(...this._params.position);
-        idealOffset.applyQuaternion(this._params.target.quaternion);
-        idealOffset.add(this._params.target.position);
-        return idealOffset;
-    }
-
-    _CalculateIdealLookAt(){
-        const idealLookAt = new THREE.Vector3(...this._params.lookAt);
-        idealLookAt.applyQuaternion(this._params.target.quaternion);
-        idealLookAt.add(this._params.target.position);
-        return idealLookAt;
-    }
-
-    Update(){
-        const idealOffset = this._CalculateIdealOffset();
-        const idealLookAt = this._CalculateIdealLookAt();
-
-        this._currentPosition.copy(idealOffset);
-        this._currentLookAt.copy(idealLookAt);
-
-        this._camera.position.copy(this._currentPosition);
-        this._camera.lookAt(this._currentLookAt)
-    }
-}
 
 //Instância da camera em terceira pessoa
 //Target é o alvo observado
