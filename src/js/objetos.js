@@ -58,6 +58,7 @@ export class Track extends THREE.BufferGeometry{
         }
 
         this.setFromPoints(points);
+        this.computeVertexNormals();
     }
 }
 
@@ -77,7 +78,7 @@ export class Tree extends THREE.Group{
         tronco.castShadow = true;
 
         const folhas = new THREE.Mesh(
-            new THREE.ConeGeometry(radius*ratio*2,height*ratio,32), 
+            new THREE.ConeGeometry(radius*ratio*2,height*ratio,3200), 
             new THREE.MeshPhongMaterial({color: 0x3A5F0B})
         ); 
         
