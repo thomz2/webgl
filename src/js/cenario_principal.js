@@ -4,10 +4,10 @@ import * as dat from 'dat.gui';
 import Race from './race';
 import {Track, Tree, Building} from './objetos.js';
 
-import grass from '../../assets/grass.jpg';
-import space from '../../assets/space.jpeg';
-import sun from '../../assets/sun.jpg';
-import road from '../../assets/road.jpg';
+import grass from '../assets/grass.jpg';
+import space from '../assets/space.jpeg';
+import sun from '../assets/sun.jpg';
+import road from '../assets/road.jpg';
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
@@ -34,6 +34,8 @@ void main() {
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+
+renderer.shadowMap.enabled = true;
 
 document.body.appendChild(renderer.domElement);
 
@@ -76,39 +78,46 @@ gui.add({"Modo debug": () => options.debug = !options.debug}, 'Modo debug')
 //Luzes ambiente e direcional + Sol + background
 scene.add(new THREE.AmbientLight(0xfffff0,0.3));
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+// directionalLight.castShadow = true;
+// directionalLight.position.set(0, 100, 0);
 
-directionalLight.castShadow = true;
+const spotLight = new THREE.SpotLight(0xFFFFFF);
+scene.add(spotLight);
+spotLight.position.set(-100, 100, -100);
+spotLight.castShadow = true;
 
-directionalLight.position.set(0, 100, 0);
+const sLightHelper = new THREE.SpotLightHelper(spotLight);
+scene.add(sLightHelper);
 
 let t = new THREE.Object3D();
 t.translateX(100);
 t.translateY(100);
 t.translateZ(100);
 
-directionalLight.target = t;
+// directionalLight.target = t;
 
-scene.add(directionalLight);
-scene.add(directionalLight.target);
+// scene.add(directionalLight);
+// scene.add(directionalLight.target);
 
 const Sun = new THREE.Mesh(
-                new THREE.SphereGeometry(10),
+    new THREE.SphereGeometry(10),
 
-                new THREE.MeshBasicMaterial({
-                    map: new THREE.TextureLoader().load(sun)
-                })
+    new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load(sun)
+    })
 );
 
 Sun.position.x = -100;
 Sun.position.y = 100;
 Sun.position.z = -100;
 
-
 scene.add(Sun);
 
-scene.background = new THREE.TextureLoader().load(space);
+// const helper = new THREE.CameraHelper( directionalLight.shadow.camera );
+// scene.add(helper);
 
+scene.background = new THREE.TextureLoader().load(space);
 
 //Malhas do Threejs
 const boxGeo = new THREE.BoxGeometry(2, 2, 2);
@@ -135,16 +144,27 @@ const texture = new THREE.TextureLoader().load(grass);
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set(5,5);
-const groundMat = new THREE.MeshBasicMaterial({ 
+const groundMat = new THREE.MeshStandardMaterial({ 
 	map: texture
  });
 
 const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+groundMesh.receiveShadow = true;
+groundMesh.castShadow = true;
 scene.add(groundMesh);
 
-const pista = new THREE.Mesh(new Track(Race.track), new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(road)}));
+const pista = new THREE.Mesh(
+    new Track(Race.track), 
+    new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load(road)
+        // color: 0xDDDDDD,
+        // wireframe: true
+    })
+);
 pista.position.y = 0.1
 scene.add(pista);
+// pista.receiveShadow = true;
+// pista.castShadow = true;
 
 //Adciona as arvores
 Race.trees.map(arvore => {
