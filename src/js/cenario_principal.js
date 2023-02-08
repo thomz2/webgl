@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {VertexNormalsHelper} from 'three/examples/jsm/helpers/VertexNormalsHelper';
 import * as dat from 'dat.gui';
 import Race from './race';
 import {Track, Tree, Building} from './objetos.js';
@@ -82,23 +83,14 @@ scene.add(new THREE.AmbientLight(0xfffff0,0.3));
 // directionalLight.castShadow = true;
 // directionalLight.position.set(0, 100, 0);
 
-const spotLight = new THREE.SpotLight(0xFFFFFF);
+const spotLight = new THREE.SpotLight(0xFFFFFF, 0.85);
+spotLight.angle = 0.7;
 scene.add(spotLight);
-spotLight.position.set(-100, 100, -100);
+spotLight.position.set(-200, 200, -200);
 spotLight.castShadow = true;
 
 const sLightHelper = new THREE.SpotLightHelper(spotLight);
 scene.add(sLightHelper);
-
-let t = new THREE.Object3D();
-t.translateX(100);
-t.translateY(100);
-t.translateZ(100);
-
-// directionalLight.target = t;
-
-// scene.add(directionalLight);
-// scene.add(directionalLight.target);
 
 const Sun = new THREE.Mesh(
     new THREE.SphereGeometry(10),
@@ -108,9 +100,9 @@ const Sun = new THREE.Mesh(
     })
 );
 
-Sun.position.x = -100;
-Sun.position.y = 100;
-Sun.position.z = -100;
+Sun.position.x = -200;
+Sun.position.y = 200;
+Sun.position.z = -200;
 
 scene.add(Sun);
 
@@ -155,16 +147,20 @@ scene.add(groundMesh);
 
 const pista = new THREE.Mesh(
     new Track(Race.track), 
-    new THREE.MeshBasicMaterial({
+    new THREE.MeshStandardMaterial({
         map: new THREE.TextureLoader().load(road)
         // color: 0xDDDDDD,
         // wireframe: true
     })
 );
 pista.position.y = 0.1
+
 scene.add(pista);
-// pista.receiveShadow = true;
+pista.receiveShadow = true;
 // pista.castShadow = true;
+
+
+// scene.add(helper);
 
 //Adciona as arvores
 Race.trees.map(arvore => {
