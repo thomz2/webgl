@@ -73,6 +73,8 @@ export class Tree extends THREE.Group{
                         );
 
         tronco.position.set(0,height/2,0);
+        tronco.receiveShadow = true;
+        tronco.castShadow = true;
 
         const folhas = new THREE.Mesh(
             new THREE.ConeGeometry(radius*ratio*2,height*ratio,32), 
@@ -80,7 +82,9 @@ export class Tree extends THREE.Group{
         ); 
         
         folhas.position.set(0,height*(ratio/2+1),0);
-        
+        folhas.receiveShadow = true;
+        folhas.castShadow = true;
+
         this.add(tronco);
         this.add(folhas);
 
