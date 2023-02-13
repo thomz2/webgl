@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader';
 // import {VertexNormalsHelper} from 'three/examples/jsm/helpers/VertexNormalsHelper';
 import * as dat from 'dat.gui';
 import { Carro } from './classes/Car1';
@@ -86,6 +87,31 @@ const sun = new Sun(scene, -200, 200, -200);
 scene.background = new THREE.TextureLoader().load(space);
 
 //Malhas do Threejs
+
+//Carregar o carro
+const loader = new OBJLoader();
+//Path absoluto, não funciona por violar politica CORS
+// loader.setPath('D:\\Nova pasta\\WebGl\\Three\\src\\assets\\car.obj');
+
+//Path relativo, não funciona pois retorna apenas a página html
+//Problema: adicionar um caminho url no estilo localhost:1234/misc/car.obj que permita acessar essa informação
+loader.load(
+    '../assets/car.obj',
+    function ( object ) {
+
+        console.log(object);
+        scene.add(object);
+
+	},
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+    (error) => {
+        console.log(error)
+    }
+)
+
+
 const boxGeo = new THREE.BoxGeometry(2, 2, 2);
 const boxMat = new THREE.ShaderMaterial({
 	uniforms:{},
