@@ -3,7 +3,7 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader';
 // import {VertexNormalsHelper} from 'three/examples/jsm/helpers/VertexNormalsHelper';
 import * as dat from 'dat.gui';
-import { Carro } from './classes/Car1';
+import { Carro } from './classes/Car2';
 import { Tree } from './classes/Tree';
 import { Building } from './classes/Building';
 import { Track } from './classes/Track';
