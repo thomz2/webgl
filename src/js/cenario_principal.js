@@ -70,6 +70,14 @@ const options = {
 
 gui = new dat.GUI();
 
+function retornarAtivarGrama(){
+    var grama = false;
+    return () => {
+        (grama)? scene.remove(instancedMesh) : scene.add( instancedMesh );
+        grama = !grama;
+    }
+}
+
 gui.add(options, 'boxMass', 0.1, 2);
 gui.add(options, 'sphereMass', 0.1, 2);
 gui.add(options, 'wheelForce', 5, 100);
@@ -77,6 +85,7 @@ gui.add(options, 'wheelSteer', Math.PI / 16, Math.PI / 2);
 gui.add(options, 'tamanhoCarro', 0.1, 1.5);
 gui.add({"Mudar Câmera": () => camera.lockOn = !camera.lockOn}, 'Mudar Câmera')
 gui.add({"Modo debug": () => options.debug = !options.debug}, 'Modo debug')
+gui.add({"Ativar grama": retornarAtivarGrama()}, "Ativar grama");
 
 //Luzes ambiente e direcional + Sol + background
 scene.add(new THREE.AmbientLight(0xfffff0,0.3));
@@ -335,10 +344,124 @@ function attOptions() {
     carro.setTamanho(options.tamanhoCarro);
 }
 
+/////////////////////////////////////////
+//////////// COMEÇO DA GRAMA/////////////
+/////////////////////////////////////////
+
+const clock = new THREE.Clock();
+
+const vertexShader = `
+  varying vec2 vUv;
+  uniform float time;
+  
+	void main() {
+
+    vUv = uv;
+    
+    // VERTEX POSITION
+    
+    vec4 mvPosition = vec4( position, 1.0 );
+    #ifdef USE_INSTANCING
+    	mvPosition = instanceMatrix * mvPosition;
+    #endif
+    
+    // DISPLACEMENT
+    
+    // here the displacement is made stronger on the blades tips.
+    float dispPower = 1.0 - cos( uv.y * 3.1416 / 2.0 );
+    
+    float displacement = sin( mvPosition.z + time * 10.0 ) * ( 0.1 * dispPower );
+    mvPosition.z += displacement;
+    
+    //
+    
+    vec4 modelViewPosition = modelViewMatrix * mvPosition;
+    gl_Position = projectionMatrix * modelViewPosition;
+
+	}
+`;
+
+const fragmentShader = `
+  varying vec2 vUv;
+  
+  void main() {
+  	vec3 baseColor = vec3( 0.3607, 0.662, 0.0156 );
+    float clarity = ( vUv.y * 0.5 ) + 0.5;
+    gl_FragColor = vec4( baseColor * clarity, 1 );
+  }
+`;
+
+const uniforms = {
+	time: {
+  	value: 0
+  }
+}
+
+const leavesMaterial = new THREE.ShaderMaterial({
+	vertexShader,
+  fragmentShader,
+  uniforms,
+  side: THREE.DoubleSide
+});
+
+const instanceNumber = 500000;
+const dummy = new THREE.Object3D();
+
+const geometry = new THREE.PlaneGeometry( 0.1, 1, 1, 4 );
+geometry.translate( 0, 0.5, 0 ); // move grass blade geometry lowest point at 0.
+
+const instancedMesh = new THREE.InstancedMesh( geometry, leavesMaterial, instanceNumber );
+
+// Position and scale the grass blade instances randomly.
+
+for ( let i=0 ; i<instanceNumber ; i++ ) {
+
+    const track = Race.track.leftCurb;
+
+    const index = Math.round(Math.random()*74);
+
+    const x =  ( Math.random() - 0.5 ) * 100;
+
+    const z = ( Math.random() - 0.5 ) * 100;
+
+    if(Math.abs(x)-30 > Math.abs(track[index*3])){
+        i--;
+        continue;
+    }
+
+    if(Math.abs(z)-30 > Math.abs(track[index*3+2])){
+        i--;
+        continue;
+    }
+
+	dummy.position.set(
+        x + track[index*3],
+        0,
+        z + track[index*3+2]
+    );
+  
+  dummy.scale.setScalar( 0.5 + Math.random() * 0.5 );
+  
+  dummy.rotation.y = Math.random() * Math.PI;
+  
+  dummy.updateMatrix();
+  instancedMesh.setMatrixAt( i, dummy.matrix );
+
+  dummy.position.y =0.7;
+
+}
+
+/////////////////////////////////////////
+//////////// FIM DA GRAMA////////////////
+/////////////////////////////////////////
+
 function animate() {
     world.step(timeStep);
     
     if(options.debug) cannonDebugger.update()
+
+    leavesMaterial.uniforms.time.value = clock.getElapsedTime();
+    leavesMaterial.uniformsNeedUpdate = true;
 
     carro.attPositions();
 
