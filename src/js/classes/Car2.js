@@ -29,22 +29,10 @@ export class Carro {
         // criando a parte visual
         this.scene = scene;
         this.world = world;
-        this.carroMesh = {
-            chassis:  new THREE.Mesh(new THREE.BoxGeometry(8, 1, 4), this.criarMaterial()),
-            rodas: [
-                new THREE.Mesh(new THREE.SphereGeometry(1), this.criarMaterial()),
-                new THREE.Mesh(new THREE.SphereGeometry(1), this.criarMaterial()),
-                new THREE.Mesh(new THREE.SphereGeometry(1), this.criarMaterial()),
-                new THREE.Mesh(new THREE.SphereGeometry(1), this.criarMaterial())
-            ]
-        };
+        
 
         this.loadModel();
-
         // console.log(this.carroMesh.chassis.scale);
-        if (scene) {
-            this.addToScene(scene);
-        }
         // console.log(this.carroMesh.rodas[0]);
 
         // parte fisica
@@ -81,17 +69,10 @@ export class Carro {
     }
     
     attPositions() {
-        this.carroMesh.chassis.position.copy(this.vehicle.chassisBody.position);
-        this.carroMesh.chassis.quaternion.copy(this.vehicle.chassisBody.quaternion);
-        for (var i = 0; i < 4; ++i) {
-            this.carroMesh.rodas[i].position.copy(this.vehicle.wheelBodies[i].position);
-            this.carroMesh.rodas[i].quaternion.copy(this.vehicle.wheelBodies[i].quaternion);
-        }
-        
-        if(this.model){
-            this.model.position.copy(this.vehicle.chassisBody.position);
-            this.model.quaternion.copy(this.vehicle.chassisBody.quaternion);
-            this.model.rotateY(Math.PI)
+        if(this.carroMesh){
+            this.carroMesh.position.copy(this.vehicle.chassisBody.position);
+            this.carroMesh.quaternion.copy(this.vehicle.chassisBody.quaternion);
+            this.carroMesh.rotateY(Math.PI)
         }
     }
 
@@ -100,16 +81,11 @@ export class Carro {
     }
 
     addToScene(scene) {
-        // scene.add(this.carroMesh.chassis);
-        // for (var i = 0; i < 4; ++i) {
-        //     scene.add(this.carroMesh.rodas[i]);
-        // }
         this.scene = scene;
-        if(this.model) scene.add(this.model);
+        scene.add(this.carroMesh);
     }
 
-
-    //Modificar para mudar a escala do modelo
+    //Modificar posteriormente para alterar o tamanho do modelo
     setTamanho(tam) {
         // tamanho de 0.1 a 1
     
@@ -127,7 +103,6 @@ export class Carro {
 
     }
 
-
     async loadModel(){
 
         const loader = new OBJLoader();
@@ -136,7 +111,7 @@ export class Carro {
         loader.load(
             'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.obj',
             function ( object ) {
-                carro.model = object;
+                carro.carroMesh = object;
                 carro.addToScene(carro.scene)
                 console.log("done")
             }
@@ -144,4 +119,5 @@ export class Carro {
 
         return true;
     }
+
 }
