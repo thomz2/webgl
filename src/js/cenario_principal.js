@@ -8,6 +8,7 @@ import { Building } from './classes/Building';
 import { Track } from './classes/Track';
 import { ThirdPersonCamera } from './classes/ThirdPersonCamera';
 import { Sun} from './classes/Sun';
+import { Lamp} from './classes/Lamp';
 
 import Race from './race';
 
@@ -154,8 +155,14 @@ Race.trees.map(arvore => {
 Race.buildings.map(construcao =>{
     scene.add(new THREE.Mesh(
         new Building(construcao),
-        new THREE.MeshBasicMaterial({color: 0xFFFF00, wireframe:true})
+        new THREE.MeshStandardMaterial({color: 0x808076})
     ))
+});
+
+Race.lamps.map(lampada => {
+    const lamp = new Lamp(0.3, lampada.height*2);
+    lamp.setPosition(...lampada.position);
+    lamp.addToScene(scene);
 });
 
 const carro = new Carro();
@@ -250,6 +257,19 @@ Race.trees.map(arvore => {
     );
 
     world.addBody(tree);
+});
+
+Race.lamps.map((lampada) => {
+
+    lampada.position.y = 8;
+    const lamp = new CANNON.Body({
+        mass:0,
+        shape:new CANNON.Cylinder(0.3,0.3,8,8),
+        position: new CANNON.Vec3(...lampada.position).vadd(new CANNON.Vec3(0,4,0)),
+        material: boxPhysMat
+    });
+
+    world.addBody(lamp);
 });
 
 //Instância da camera em terceira pessoa
@@ -386,7 +406,7 @@ const fragmentShader = `
   
   void main() {
   	vec3 baseColor = vec3( 0.3607, 0.662, 0.0156 );
-    float clarity = ( vUv.y * 0.5 ) + 0.5;
+    float clarity = ( vUv.y * 0.5 ) + 0.6;
     gl_FragColor = vec4( baseColor * clarity, 1 );
   }
 `;
