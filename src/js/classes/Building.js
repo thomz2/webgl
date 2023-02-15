@@ -32,22 +32,22 @@ export class Building extends THREE.BufferGeometry{
 
         var triangleOffset = 0;
         for (var i=0; i<nv; ++i) {
-            this.triangleIndices[triangleOffset + 0] = i;
+            this.triangleIndices[triangleOffset + 2] = i;
             this.triangleIndices[triangleOffset + 1] = (i + 1) % nv;
-            this.triangleIndices[triangleOffset + 2] = nv+ (i+1)%nv;
+            this.triangleIndices[triangleOffset] = nv+ (i+1)%nv;
             triangleOffset += 3;
 
-            this.triangleIndices[triangleOffset + 0]  = i ;
+            this.triangleIndices[triangleOffset + 2]  = i ;
             this.triangleIndices[triangleOffset + 1]  =nv+ (i+1)%nv;
-            this.triangleIndices[triangleOffset + 2]  =nv+ i ;
+            this.triangleIndices[triangleOffset]  =nv+ i ;
             triangleOffset += 3;
         }
         
         /* triangles for the roof */
         for (var i=0; i<(nv-2); ++i) {
-            this.triangleIndices[triangleOffset + 0] = nv;
+            this.triangleIndices[triangleOffset + 2] = nv;
             this.triangleIndices[triangleOffset + 1] = nv + (i + 1) ;
-            this.triangleIndices[triangleOffset + 2] = nv + (i + 2) % nv;
+            this.triangleIndices[triangleOffset] = nv + (i + 2) % nv;
             triangleOffset += 3;
         }
 
@@ -66,5 +66,7 @@ export class Building extends THREE.BufferGeometry{
         }
 
         this.setFromPoints(points);
+        this.computeVertexNormals();
+
     }
 };
