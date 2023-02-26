@@ -194,10 +194,24 @@ const boxBody = new CANNON.Body({
     position: new CANNON.Vec3(1, 20, 0),
     material: boxPhysMat
 });
+
 world.addBody(boxBody);
 
 boxBody.angularVelocity.set(0, 10, 0);
 boxBody.angularDamping = 0.5;
+
+//Corpo fisico das construções
+Race.buildings.map( building => {
+    const b = new Building(building);
+
+    let body = b.getPhysicsBody(boxPhysMat);
+
+    var axis = new CANNON.Vec3(0,1,0);
+    var angle = Math.PI / 3;
+    body.quaternion.setFromAxisAngle(axis, angle);
+
+    world.addBody(body);
+});
 
 const groundBoxContactMat = new CANNON.ContactMaterial(
     groundPhysMat,
