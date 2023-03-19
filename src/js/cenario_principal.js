@@ -15,6 +15,8 @@ import Race from './race';
 import grass from '../assets/grass.jpg';
 import space from '../assets/space.jpeg';
 import road from '../assets/road.jpg';
+import sides from '../assets/sides.jpg';
+import front from '../assets/front.jpg';
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
@@ -135,8 +137,6 @@ const pista = new THREE.Mesh(
     new Track(Race.track), 
     new THREE.MeshStandardMaterial({
         map: new THREE.TextureLoader().load(road)
-        // color: 0xDDDDDD,
-        // wireframe: true
     })
 );
 pista.position.y = 0.1
@@ -151,12 +151,32 @@ Race.trees.map(arvore => {
     scene.add(tree)
 });
 
-//Adciona as construções
+//Adciona as construções => gambiarra mais horrorosa já escrita, refazer depois
 Race.buildings.map(construcao =>{
-    scene.add(new THREE.Mesh(
-        new Building(construcao),
-        new THREE.MeshStandardMaterial({color: 0x808076})
-    ))
+
+    const building = new Building(construcao);
+
+    const objeto = new THREE.Mesh(
+        building.geometry,
+        [new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(front)}),
+            new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(front)}),
+            new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(sides)}),
+            new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(sides)}),
+            new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(front)}),
+            new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(front)})]
+    );
+
+    console.log(objeto.position);
+
+    objeto.position.x = building.position.x + building.width/2;
+    objeto.position.y = 5;
+    objeto.position.z = building.position.z+building.length/2;
+
+    objeto.rotation.set(0,Math.PI/3,0)
+
+    scene.add(objeto)
+
+    console.log(new THREE.BoxGeometry(1,2,1))
 });
 
 Race.lamps.map(lampada => {
