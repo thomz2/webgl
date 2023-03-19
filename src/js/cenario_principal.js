@@ -318,6 +318,30 @@ const thirdPerson = new ThirdPersonCamera({
 });
 
 //Listeners
+
+// Add an event listener for the 'click' event
+document.addEventListener('click', event => {
+  // Get the mouse coordinates
+  const mouse = new THREE.Vector2();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // Create a raycaster from the camera position and the mouse coordinates
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+
+  // Find all objects intersected by the raycaster
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  if (intersects.length > 0) {
+    // The first intersected object is the closest one
+    const point = intersects[0].point;
+
+    // Print the X, Y, and Z coordinates to the console
+    console.log(`COORDENADAS: X: ${point.x}, Y: ${point.y}, Z: ${point.z}`);
+  }
+});
+
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
 
@@ -534,6 +558,27 @@ function animate() {
     if(camera.lockOn) thirdPerson.Update();
 
     attOptions();
+
+    // mesma coisa do que ta explicado em baixo (programacao paralela mal feita rs)
+    if (carro.hasOwnProperty('carroMesh')){
+
+        // if checando se o objeto carroMesh tem a propriedade position
+        // (buga no começo da renderização pois em certo tempo 'position' eh undefined)
+        if (carro.carroMesh.hasOwnProperty('position')){
+            // vec3 com posicao da malha do carro
+            var pos = carro.carroMesh.position;
+            
+            // console.log(pos);
+            
+            // verificação da partida/chegada
+            // if (pos.x > -72 && pos.x < -71 &&
+            //     pos.y > 1.08 && pos.y < 1.1 &&
+            //     pos.z > 0.98 && pos.z < 0.99) {
+            //         console.log("passou pela linha");
+            // }
+
+        }
+    }
 }
 
 renderer.setAnimationLoop(animate);
