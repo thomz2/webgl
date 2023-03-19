@@ -27,8 +27,11 @@ export class Building extends THREE.BufferGeometry{
 
         this.getPosition();
 
+        this.setTexture();
+
         // this.getRotation();
 
+        this.geometry = new THREE.BoxGeometry(this.width,10,this.length)
     }
 
     //Extrai os vértices da outline
@@ -166,5 +169,10 @@ export class Building extends THREE.BufferGeometry{
             position: new CANNON.Vec3(this.position.x + this.width/2, 5, this.position.z+this.length/2),
             material: material
         });
+    }
+
+    setTexture(){
+
+        this.setAttribute( 'uv', new THREE.BoxGeometry(1,1,1).attributes.uv );
     }
 };
