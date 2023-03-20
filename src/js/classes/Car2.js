@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader'
 
 export class Carro {
 
@@ -29,9 +30,34 @@ export class Carro {
         // criando a parte visual
         this.scene = scene;
         this.world = world;
-        
 
-        this.loadModel();
+        var carro = this;
+        
+        // tentando carregar arquivo PLY
+        this.loader = new PLYLoader();
+        this.loader.load(
+            'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.ply',
+            function ( object ) {
+                carro.carroMesh = new THREE.Mesh(
+                    object
+                    // new THREE.MeshPhysicalMaterial({
+                    //     color: 0xb2ffc8,
+                    //     metalness: 0,
+                    //     roughness: 0,
+                    //     transparent: true,
+                    //     transmission: 1.0,
+                    //     side: THREE.DoubleSide,
+                    //     clearcoat: 1.0,
+                    //     clearcoatRoughness: 0.25
+                    // })
+                );
+                carro.addToScene(carro.scene);
+                console.log(carro.carroMesh);
+            }
+        );
+        // fim da tentativa
+
+        // this.loadModel();
         // console.log(this.carroMesh.chassis.scale);
         // console.log(this.carroMesh.rodas[0]);
 
