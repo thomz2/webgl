@@ -20,6 +20,7 @@ import front from '../assets/front.jpg';
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
+import { Vector3 } from 'three';
 
 //Shaders
 const VS = `
@@ -268,6 +269,9 @@ const vehicle = carro.vehicle;
 
 carro.addToScene(scene);
 carro.addToWorld(world);
+// gambiarra para o carro ficar antes da largada
+carro.carBody.quaternion.setFromEuler(0, -Math.PI/2 + 0.36, 0);
+
 
 // adicionando corpos das arvores pelo CANNON
 Race.trees.map(arvore => {
@@ -571,11 +575,10 @@ function animate() {
             // console.log(pos);
             
             // verificação da partida/chegada
-            // if (pos.x > -72 && pos.x < -71 &&
-            //     pos.y > 1.08 && pos.y < 1.1 &&
-            //     pos.z > 0.98 && pos.z < 0.99) {
-            //         console.log("passou pela linha");
-            // }
+            if (pos.x > -79 && pos.x < -73 &&
+                pos.z > -6 && pos.z < -3.3) {
+                    console.log("passou pela linha");
+            }
 
         }
     }
