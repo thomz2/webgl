@@ -7,8 +7,8 @@ import { Tree } from './classes/Tree';
 import { Building } from './classes/Building';
 import { Track } from './classes/Track';
 import { ThirdPersonCamera } from './classes/ThirdPersonCamera';
-import { Sun} from './classes/Sun';
-import { Lamp} from './classes/Lamp';
+import { Sun } from './classes/Sun';
+import { Lamp } from './classes/Lamp';
 
 import Race from './race';
 
@@ -20,7 +20,6 @@ import front from '../assets/front.jpg';
 
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
-import { Vector3 } from 'three';
 
 //Shaders
 const VS = `
@@ -100,6 +99,19 @@ scene.background = new THREE.TextureLoader().load(space);
 
 //Malhas do Threejs
 
+const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints( [
+        new THREE.Vector3(-70.56, 0.1, -5.73),
+        new THREE.Vector3(-77.34, 0.1, -1.47)
+    ] ), 
+    new THREE.LineBasicMaterial({ color: 0xff0000 }) 
+);
+scene.add(line);
+// if (pos.x > -79 && pos.x < -73 &&
+//     pos.z > -6 && pos.z < -3.3) {
+
+let cube1BB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+cube1BB.setFromObject(line);
 
 const boxGeo = new THREE.BoxGeometry(2, 2, 2);
 const boxMat = new THREE.ShaderMaterial({
@@ -187,6 +199,9 @@ Race.lamps.map(lampada => {
 });
 
 const carro = new Carro();
+
+let cube2BB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+// cube2BB.setFromObject(carro.carBody);
 
 const world = new CANNON.World({
     gravity: new CANNON.Vec3(0, -9.81, 0)
@@ -575,10 +590,9 @@ function animate() {
             // console.log(pos);
             
             // verificação da partida/chegada
-            if (pos.x > -79 && pos.x < -73 &&
-                pos.z > -6 && pos.z < -3.3) {
-                    console.log("passou pela linha");
-            }
+            // if (line.) {
+            //         console.log("passou pela linha");
+            // }
 
         }
     }
