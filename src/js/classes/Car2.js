@@ -38,7 +38,7 @@ export class Carro {
         // parte fisica
         this.carBody = new CANNON.Body({
             mass: 5,
-            position: new CANNON.Vec3(0, 6, 0),
+            position: new CANNON.Vec3(-86, 0.1, -33),
             shape: new CANNON.Box(new CANNON.Vec3(4, 0.5, 2))
         });
         this.vehicle = new CANNON.RigidVehicle({
@@ -112,8 +112,8 @@ export class Carro {
             'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.obj',
             function ( object ) {
                 carro.carroMesh = object;
-                carro.addToScene(carro.scene)
-                console.log("done")
+                carro.addToScene(carro.scene);
+                console.log(carro.carroMesh);
             }
         );
 
