@@ -31,35 +31,15 @@ export class Carro {
         this.scene = scene;
         this.world = world;
 
-        var carro = this;
-        
-        // tentando carregar arquivo PLY
-        this.loader = new PLYLoader();
-        this.loader.load(
-            'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.ply',
-            function ( object ) {
-                carro.carroMesh = new THREE.Mesh(
-                    object
-                    // new THREE.MeshPhysicalMaterial({
-                    //     color: 0xb2ffc8,
-                    //     metalness: 0,
-                    //     roughness: 0,
-                    //     transparent: true,
-                    //     transmission: 1.0,
-                    //     side: THREE.DoubleSide,
-                    //     clearcoat: 1.0,
-                    //     clearcoatRoughness: 0.25
-                    // })
-                );
-                carro.addToScene(carro.scene);
-                console.log(carro.carroMesh);
-            }
-        );
-        // fim da tentativa
+        // bounding box
+        this.cube2BB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
 
-        // this.loadModel();
-        // console.log(this.carroMesh.chassis.scale);
-        // console.log(this.carroMesh.rodas[0]);
+        // npm install http-server -g
+        // cd .\webgl\threejs\src\assets\
+        // http-server .\ -i
+        
+        // this.loadPLYModel();
+    
 
         // parte fisica
         this.carBody = new CANNON.Body({
@@ -93,7 +73,7 @@ export class Carro {
         this.maxForce = 40;
         this.maxSteerVal = Math.PI / 8;
     }
-    
+
     attPositions() {
         if(this.carroMesh){
             this.carroMesh.position.copy(this.vehicle.chassisBody.position);
@@ -129,21 +109,47 @@ export class Carro {
 
     }
 
-    async loadModel(){
+    // TODO: deixar que nem a funcao abaixo
+    // async loadOBJModel(){
 
-        const loader = new OBJLoader();
+    //     const loader = new OBJLoader();
 
-        var carro = this;
-        loader.load(
-            'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.obj',
-            function ( object ) {
-                carro.carroMesh = object;
-                carro.addToScene(carro.scene);
-                console.log(carro.carroMesh);
-            }
+    //     var carro = this;
+    //     loader.load(
+    //         'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.obj',
+    //         function ( object ) {
+    //             carro.carroMesh = object;
+    //             carro.addToScene(carro.scene);
+    //             console.log(carro.carroMesh);
+    //         }
+    //     );
+
+    //     return true;
+    // }
+
+    async loadPLYModel(){
+
+        const loader = new PLYLoader();
+
+        const obj = await new Promise((resolve, reject) => {
+            loader.load(
+                'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.ply',
+                resolve,
+                (error) => {
+                    console.log(error);
+                }
+            );
+        });
+
+        this.carroMesh = new THREE.Mesh(
+            obj,
+            new THREE.MeshPhysicalMaterial({
+                color: 0xb2ffc8
+            })
         );
 
-        return true;
+        this.scene.add(this.carroMesh);
+
     }
 
 }
