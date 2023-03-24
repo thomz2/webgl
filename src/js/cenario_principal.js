@@ -99,20 +99,6 @@ scene.background = new THREE.TextureLoader().load(space);
 
 //Malhas do Threejs
 
-const line = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints( [
-        new THREE.Vector3(-70.56, 0.1, -5.73),
-        new THREE.Vector3(-77.34, 0.1, -1.47)
-    ] ), 
-    new THREE.LineBasicMaterial({ color: 0xff0000 }) 
-);
-scene.add(line);
-// if (pos.x > -79 && pos.x < -73 &&
-//     pos.z > -6 && pos.z < -3.3) {
-
-let cube1BB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
-cube1BB.setFromObject(line);
-
 const boxGeo = new THREE.BoxGeometry(2, 2, 2);
 const boxMat = new THREE.ShaderMaterial({
 	uniforms:{},
@@ -198,10 +184,34 @@ Race.lamps.map(lampada => {
     lamp.addToScene(scene);
 });
 
+const pontosDaLinhaAbaixo = [new THREE.Vector3(-70.56, 0.6, -5.73), new THREE.Vector3(-77.34, 0.6, -1.47)];
+
+const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(pontosDaLinhaAbaixo), 
+    new THREE.LineBasicMaterial({ color: 0xff0000 }) 
+);
+scene.add(line);
+
+const midpoint = new THREE.Vector3();
+midpoint.addVectors(pontosDaLinhaAbaixo[0], pontosDaLinhaAbaixo[1]).multiplyScalar(0.5)
+
+console.log("line pos")
+console.log(line);
+
+const raycasterLine = new THREE.Raycaster(midpoint, new THREE.Vector3(0, 1, 0));
+scene.add(getRayCastLine(raycasterLine));
+
 const carro = new Carro();
 
-let cube2BB = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
-// cube2BB.setFromObject(carro.carBody);
+let carroflag = false;
+
+// parte assincrona do codigo, aqui faco operacoes com a malha do carro
+// retirei o loadPLYModel do construtor do Carro e coloquei na funcao assincrona, fica melhor
+(async function() {
+    await carro.loadPLYModel();
+    carroflag = true;
+})();
+// jeito para checar se algo foi carregado: usando flag
 
 const world = new CANNON.World({
     gravity: new CANNON.Vec3(0, -9.81, 0)
@@ -282,6 +292,7 @@ var maxSteerVal = Math.PI / 8;
 
 const vehicle = carro.vehicle;
 
+// TODO: ver o que tem de errado aqui
 carro.addToScene(scene);
 carro.addToWorld(world);
 // gambiarra para o carro ficar antes da largada
@@ -552,6 +563,28 @@ for ( let i=0 ; i<instanceNumber ; i++ ) {
 //////////// FIM DA GRAMA////////////////
 /////////////////////////////////////////
 
+// linha para testar raycast
+function getRayCastLine (raycaster) {
+    const lineGeometry = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints( [
+            raycaster.ray.origin,
+            raycaster.ray.at(1000, new THREE.Vector3(0, 0, 0))
+        ] ),
+        new THREE.LineBasicMaterial({ color: 0xff0000 })    
+    );
+    
+    return lineGeometry;
+}
+
+function checkColisions() {
+    if (carroflag) {
+        const intersectsLine = raycasterLine.intersectObjects(scene.children);
+        if (intersectsLine.length >= 3) {
+            console.log("INTERSECTOU A LINHA!");   
+        }
+    }
+}
+
 function animate() {
     world.step(timeStep);
     
@@ -596,6 +629,8 @@ function animate() {
 
         }
     }
+
+    checkColisions();
 }
 
 renderer.setAnimationLoop(animate);
