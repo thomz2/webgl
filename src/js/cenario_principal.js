@@ -14,7 +14,7 @@ import Race from './race';
 
 import grass from '../assets/grass.jpg';
 import space from '../assets/space.jpeg';
-import road from '../assets/road.jpg';
+import highway from '../assets/highway.jpg';
 import sides from '../assets/sides.jpg';
 import front from '../assets/front.jpg';
 
@@ -135,7 +135,7 @@ scene.add(groundMesh);
 const pista = new THREE.Mesh(
     new Track(Race.track), 
     new THREE.MeshStandardMaterial({
-        map: new THREE.TextureLoader().load(road)
+        map: new THREE.TextureLoader().load(highway)
     })
 );
 pista.position.y = 0.1
