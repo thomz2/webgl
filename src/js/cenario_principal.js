@@ -9,6 +9,7 @@ import { Track } from './classes/Track';
 import { ThirdPersonCamera } from './classes/ThirdPersonCamera';
 import { Sun } from './classes/Sun';
 import { Lamp } from './classes/Lamp';
+import { Tunnel} from './classes/Tunnel';
 
 import Race from './race';
 
