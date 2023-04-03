@@ -110,45 +110,84 @@ export class Carro {
     }
 
     // TODO: deixar que nem a funcao abaixo
-    // async loadOBJModel(){
+    async loadOBJModel(){
 
-    //     const loader = new OBJLoader();
+        const loader = new OBJLoader();
 
-    //     var carro = this;
-    //     loader.load(
-    //         'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.obj',
-    //         function ( object ) {
-    //             carro.carroMesh = object;
-    //             carro.addToScene(carro.scene);
-    //             console.log(carro.carroMesh);
-    //         }
-    //     );
+        var carro = this;
+        loader.load(
+            'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/eclipse-white.obj',
+            function ( object ) {
+                carro.carroMesh = object;
+                carro.addToScene(carro.scene);
+                console.log(carro.carroMesh);
+            }
+        );
 
-    //     return true;
-    // }
+        return true;
+    }
 
     async loadPLYModel(){
 
         const loader = new PLYLoader();
 
-        const obj = await new Promise((resolve, reject) => {
-            loader.load(
-                'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.ply',
-                resolve,
-                (error) => {
-                    console.log(error);
+        loader.load(
+            'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.ply',
+            (geometry) => {
+
+                geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
+
+                const color = new THREE.Color();
+                const count = geometry.attributes.position.count;
+                const positions = geometry.attributes.position.array;
+
+                //Guarda as cores em um array, cria três valores rgb para cada vértice
+                const colors = [];
+
+                for (let i = 0; i < count; i++) {
+
+                    //Vértices 0-5000 => acessórios e pneus
+                    if(i < 5000){
+                        colors[3*i] = 0;  //Red
+                        colors[3*i+1] = 0;//Green
+                        colors[3*i+2] = 0;//Blue
+                    }
+                    
+                    //Vértices 5001-12400 => interior do carro e parte de metal das rodas
+                    else if(i < 12400){
+                        colors[3*i] = 130/255;
+                        colors[3*i+1] = 135/255;
+                        colors[3*i+2] = 136/255;
+                    }
+
+                    //Vértices 12401-~15991 => chassís e placa do carro
+                    else{
+                        colors[3*i] = 189/255;
+                        colors[3*i+1] = 22/255;
+                        colors[3*i+2] = 44/255;
+                    }
+                    
                 }
-            );
-        });
 
-        this.carroMesh = new THREE.Mesh(
-            obj,
-            new THREE.MeshPhysicalMaterial({
-                color: 0xb2ffc8
-            })
+                  geometry.setAttribute('color', new THREE.BufferAttribute( new Float32Array(colors), 3 ));
+                  
+                const material= new THREE.MeshStandardMaterial({vertexColors:true})
+                  
+                this.carroMesh = new THREE.Mesh(
+                    geometry,
+                    material
+                );
+
+                console.log(this.carroMesh)
+        
+        
+                this.scene.add(this.carroMesh);
+
+            },
+            (error) => {
+                console.log(error);
+            }
         );
-
-        this.scene.add(this.carroMesh);
 
     }
 
