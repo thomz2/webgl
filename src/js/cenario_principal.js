@@ -9,9 +9,16 @@ import { Track } from './classes/Track';
 import { ThirdPersonCamera } from './classes/ThirdPersonCamera';
 import { Sun } from './classes/Sun';
 import { Lamp } from './classes/Lamp';
-import { Tunnel} from './classes/Tunnel';
+// import { Tunnel} from './classes/Tunnel';
 
 import Race from './race';
+
+import posx from '../assets/posx.jpg'
+import negx from '../assets/negx.jpg'
+import posy from '../assets/posy.jpg'
+import negy from '../assets/negy.jpg'
+import posz from '../assets/posz.jpg'
+import negz from '../assets/negz.jpg'
 
 import grass from '../assets/grass.jpg';
 import space from '../assets/space.jpeg';
@@ -96,7 +103,16 @@ scene.add(new THREE.AmbientLight(0xfffff0,0.3));
 
 const sun = new Sun(scene, -200, 200, -200);
 
-scene.background = new THREE.TextureLoader().load(space);
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+
+scene.background = cubeTextureLoader.load([
+    posx,
+    negx,
+    posy,
+    negy,
+    negz,
+    posz
+]);
 
 //Malhas do Threejs
 
