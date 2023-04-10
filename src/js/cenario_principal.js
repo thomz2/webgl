@@ -99,7 +99,9 @@ gui.add({"Modo debug": () => options.debug = !options.debug}, 'Modo debug')
 gui.add({"Ativar grama": retornarAtivarGrama()}, "Ativar grama");
 
 //Luzes ambiente e direcional + Sol + background
-scene.add(new THREE.AmbientLight(0xfffff0,0.3));
+const luzAmbiente = new THREE.AmbientLight(0xfffff0,0.3);
+luzAmbiente.intensity = 0.5;
+scene.add(luzAmbiente);
 
 const sun = new Sun(scene, -200, 200, -200);
 
