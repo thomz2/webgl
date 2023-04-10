@@ -182,6 +182,10 @@ Race.buildings.map(construcao =>{
             new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load(front)})]
     );
 
+    objeto.castShadow = true;
+    objeto.receiveShadow = false;
+    objeto.renderOrder = 0;
+
     console.log(objeto.position);
 
     objeto.position.x = building.position.x + building.width/2;
@@ -197,8 +201,13 @@ Race.buildings.map(construcao =>{
 
 Race.lamps.map(lampada => {
     const lamp = new Lamp(0.3, lampada.height*2);
+    lamp.renderOrder = 10;
     lamp.setPosition(...lampada.position);
     lamp.addToScene(scene);
+
+    // debug
+    // const lightHelper = new THREE.SpotLightHelper(lamp.light);
+    // scene.add(lightHelper);
 });
 
 const pontosDaLinhaAbaixo = [new THREE.Vector3(-70.56, 0.6, -5.73), new THREE.Vector3(-77.34, 0.6, -1.47)];
@@ -227,6 +236,13 @@ let carroflag = false;
 (async function() {
     await carro.loadPLYModel();
     carroflag = true;
+
+    carro.carroMesh.castShadow = true;
+
+    scene.children.forEach((obj) => {
+        // obj.castShadow = true;
+        obj.receiveShadow = true;
+    });
 })();
 // jeito para checar se algo foi carregado: usando flag
 
