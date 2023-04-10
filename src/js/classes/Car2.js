@@ -171,7 +171,7 @@ export class Carro {
 
                   geometry.setAttribute('color', new THREE.BufferAttribute( new Float32Array(colors), 3 ));
                   
-                const material= new THREE.MeshStandardMaterial({vertexColors:true})
+                const material= new THREE.MeshPhongMaterial({vertexColors:true})
                   
                 this.carroMesh = new THREE.Mesh(
                     geometry,
