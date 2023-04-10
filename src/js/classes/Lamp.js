@@ -12,8 +12,8 @@ export class Lamp extends THREE.Group{
                         );
 
         tronco.position.set(0,height/2,0);
-        tronco.receiveShadow = true;
-        tronco.castShadow = true;
+        tronco.receiveShadow = false;
+        tronco.castShadow = false;
 
         const lampada = new THREE.Mesh(
             new THREE.BoxGeometry(2,2,2), 
@@ -21,16 +21,24 @@ export class Lamp extends THREE.Group{
         ); 
         
         lampada.position.set(0,1+height,0);
+        lampada.receiveShadow = false;
+        lampada.castShadow = false;
+        
 
         this.add(tronco);
         this.add(lampada);
 
         this.height = height;
         this.light = new THREE.SpotLight();
+        this.light.castShadow = true;
         this.light.angle = Math.PI*angle/180;
         this.light.decay = 100;
-        this.light.intensity = 0.3;
+        this.light.intensity = 0.7;
         this.light.target = tronco;
+        this.light.order = 10;
+        // this.light.position.set(7.125, 5, 69.0625);
+
+        console.log("poste spotlight", this.light);
 
     };
 
