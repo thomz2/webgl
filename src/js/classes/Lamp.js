@@ -33,7 +33,7 @@ export class Lamp extends THREE.Group{
         this.light.castShadow = true;
         this.light.angle = Math.PI*angle/180;
         this.light.decay = 100;
-        this.light.intensity = 0.7;
+        this.light.intensity = 0.8;
         this.light.target = tronco;
         this.light.order = 10;
         // this.light.position.set(7.125, 5, 69.0625);
