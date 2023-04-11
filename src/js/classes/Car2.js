@@ -152,6 +152,18 @@ export class Carro {
                         colors[3*i+1] = 0;//Green
                         colors[3*i+2] = 0;//Blue
                     }
+
+                    else if( i < 6000){
+                        colors[3*i] = 130/255;
+                        colors[3*i+1] = 135/255;
+                        colors[3*i+2] = 136/255;
+                    }
+
+                    else if( i < 6250){
+                        colors[3*i] = 1;
+                        colors[3*i+1] = 1;
+                        colors[3*i+2] = 1;
+                    }
                     
                     //Vértices 5001-12400 => interior do carro e parte de metal das rodas
                     else if(i < 12400){
@@ -160,11 +172,17 @@ export class Carro {
                         colors[3*i+2] = 136/255;
                     }
 
-                    //Vértices 12401-~15991 => chassís e placa do carro
-                    else{
+                    else if(i < 15900){
                         colors[3*i] = 189/255;
                         colors[3*i+1] = 22/255;
                         colors[3*i+2] = 44/255;
+                    }
+
+                    //Vértices 12401-~15991 => chassís e placa do carro
+                    else{
+                        colors[3*i] = 130/255;
+                        colors[3*i+1] = 135/255;
+                        colors[3*i+2] = 136/255;
                     }
                     
                 }
@@ -177,6 +195,9 @@ export class Carro {
                     geometry,
                     material
                 );
+
+                this.carroMesh.castShadow = true;
+                this.carroMesh.receiveShadow = true;
 
                 console.log(this.carroMesh)
         
