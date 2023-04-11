@@ -74,11 +74,35 @@ export class Carro {
         this.maxSteerVal = Math.PI / 8;
     }
 
+    // this.carroMesh.geometry.attributes.position.array
+
     attPositions() {
         if(this.carroMesh){
             this.carroMesh.position.copy(this.vehicle.chassisBody.position);
             this.carroMesh.quaternion.copy(this.vehicle.chassisBody.quaternion);
-            this.carroMesh.rotateY(Math.PI)
+            this.carroMesh.rotateY(Math.PI);
+
+            // atualizando farol
+            if (this.farol1) {
+                // teste farol
+                // const verticeOffset = 8127 * this.carroMesh.geometry.position.itemSize;
+
+                const positionAttribute = this.carroMesh.geometry.attributes.position;
+                const array = positionAttribute.array;
+                const itemSize = 3;
+                const offset = 8127 * itemSize;
+
+                this.verticePos.setX(array[offset]);
+                this.verticePos.setX(array[offset + 1]);
+                this.verticePos.setX(array[offset + 2]);
+
+                // ajeitar isso em casa
+                this.verticePos.applyMatrix4(this.carroMesh.geometry.matrixWorld);
+
+                console.log('posicao do farol', this.verticePos);
+
+            }
+
         }
     }
 
@@ -135,11 +159,9 @@ export class Carro {
             'https://raw.githubusercontent.com/thomz2/webgl/main/src/assets/car.ply',
             (geometry) => {
 
-                geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
-
-                const color = new THREE.Color();
                 const count = geometry.attributes.position.count;
                 const positions = geometry.attributes.position.array;
+
 
                 //Guarda as cores em um array, cria três valores rgb para cada vértice
                 const colors = [];
@@ -169,19 +191,34 @@ export class Carro {
                     
                 }
 
-                  geometry.setAttribute('color', new THREE.BufferAttribute( new Float32Array(colors), 3 ));
+                geometry.setAttribute('color', new THREE.BufferAttribute( new Float32Array(colors), 3 ));
                   
-                const material= new THREE.MeshPhongMaterial({vertexColors:true})
+                const material = new THREE.MeshPhongMaterial({vertexColors:true})
                   
                 this.carroMesh = new THREE.Mesh(
                     geometry,
                     material
                 );
 
-                console.log(this.carroMesh)
-        
+                this.carroMesh.castShadow = true;
+
+                this.carroMesh.name = "carro2js";
+                
+                console.log('carro2js', this.carroMesh);
         
                 this.scene.add(this.carroMesh);
+
+                // teste farol
+                this.farol1 = new THREE.SpotLight(0xffffff, 1, 100, Math.PI / 4, 1);
+                
+                this.indiceVertice1 = 8127;
+                this.verticePos = new THREE.Vector3();
+
+                this.scene.add(this.farol1);
+
+                const farolHelper = new THREE.SpotLightHelper(this.farol1);
+                this.scene.add(farolHelper);
+                
 
             },
             (error) => {
