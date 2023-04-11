@@ -75,6 +75,7 @@ const options = {
     sphereMass: 1,
     wheelForce: 10,
     wheelSteer: Math.PI / 8,
+    horario: 14,
     debug: false,
     tamanhoCarro: 1
 };
@@ -94,13 +95,14 @@ gui.add(options, 'sphereMass', 0.1, 2);
 gui.add(options, 'wheelForce', 5, 100);
 gui.add(options, 'wheelSteer', Math.PI / 16, Math.PI / 2);
 gui.add(options, 'tamanhoCarro', 0.1, 1.5);
+gui.add(options, 'horario',0,24);
 gui.add({"Mudar Câmera": () => camera.lockOn = !camera.lockOn}, 'Mudar Câmera')
 gui.add({"Modo debug": () => options.debug = !options.debug}, 'Modo debug')
 gui.add({"Ativar grama": retornarAtivarGrama()}, "Ativar grama");
 
 //Luzes ambiente e direcional + Sol + background
 const luzAmbiente = new THREE.AmbientLight(0xfffff0,0.3);
-luzAmbiente.intensity = 0.5;
+luzAmbiente.intensity = 0.2;
 scene.add(luzAmbiente);
 
 const sun = new Sun(scene, -200, 200, -200);
@@ -161,6 +163,7 @@ pista.position.y = 0.1
 
 scene.add(pista);
 pista.receiveShadow = true;
+pista.castShadow = true;
 
 //Adciona as arvores
 Race.trees.map(arvore => {
@@ -485,6 +488,11 @@ function attOptions() {
     maxForce = options.wheelForce;
     maxSteerVal = options.wheelSteer;
     carro.setTamanho(options.tamanhoCarro);
+    sun.setPosition(
+        250*Math.cos(Math.PI*(1.5+options.horario/12)), 
+        250*Math.sin(Math.PI*(1.5+options.horario/12)), 
+        -200
+    );
 }
 
 /////////////////////////////////////////
