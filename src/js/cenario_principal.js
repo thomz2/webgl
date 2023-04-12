@@ -9,7 +9,7 @@ import { Track } from './classes/Track';
 import { ThirdPersonCamera } from './classes/ThirdPersonCamera';
 import { Sun } from './classes/Sun';
 import { Lamp } from './classes/Lamp';
-// import { Tunnel} from './classes/Tunnel';
+// import { Tunnel } from './classes/Tunnel';
 
 import Race from './race';
 
@@ -29,6 +29,9 @@ import front from '../assets/front.jpg';
 import * as CANNON from 'cannon-es';
 import CannonDebugger from 'cannon-es-debugger';
 
+import { handleClick, handleKeyDown, handleKeyUp } from './eventlisteners';
+import { calcular_posicao_vertice, distPontos2D } from './fisica';
+
 //Shaders
 const VS = `
 varying vec4 pos;
@@ -47,7 +50,7 @@ void main() {
 }
 `;
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -128,15 +131,6 @@ const boxMat = new THREE.ShaderMaterial({
 });
 const boxMesh = new THREE.Mesh(boxGeo, boxMat);
 scene.add(boxMesh);
-
-const sphereGeo = new THREE.SphereGeometry(2);
-const sphereMat = new THREE.ShaderMaterial({
-	uniforms:{},
-    vertexShader:VS,
-    fragmentShader:FS
-});
-const sphereMesh = new THREE.Mesh( sphereGeo, sphereMat);
-scene.add(sphereMesh);
 
 //Gramado da cena
 const groundGeo = new THREE.PlaneGeometry(300, 300);
@@ -236,18 +230,64 @@ const carro = new Carro();
 
 let carroflag = false;
 
+// TESTE ESFERA 1
+const sphereGeo = new THREE.SphereGeometry(2);
+const sphereMat = new THREE.ShaderMaterial({
+    uniforms:{},
+    vertexShader:VS,
+    fragmentShader:FS
+});
+const sphereMesh = new THREE.Mesh( sphereGeo, sphereMat );
+
+scene.add(sphereMesh);
+// FIM DO TESTE
+
+let sphereMesh2 = new THREE.Mesh();
+let sphereMesh3 = new THREE.Mesh();
+
+let farol1 = new THREE.SpotLight('aquamarine', 3);
+farol1.angle = Math.PI / 7;
+farol1.distance = 30;
+
+// const slh = new THREE.SpotLightHelper(farol1);
+
+let farol2 = new THREE.SpotLight();
+
+farol2.copy(farol1);
+
+const indice = 15702;
+
 // parte assincrona do codigo, aqui faco operacoes com a malha do carro
 // retirei o loadPLYModel do construtor do Carro e coloquei na funcao assincrona, fica melhor
 (async function() {
     await carro.loadPLYModel();
     carroflag = true;
 
-    carro.carroMesh.castShadow = true;
-
     scene.children.forEach((obj) => {
-        // obj.castShadow = true;
-        obj.receiveShadow = true;
+        try {
+            // obj.castShadow = true;
+            obj.receiveShadow = true;
+        } catch (error) {
+            console.log(obj);            
+        } 
+
     });
+
+    const sphereGeo2 = new THREE.SphereGeometry(0.1);
+    const sphereMat2 = new THREE.MeshBasicMaterial({ color: 'pink' });
+    sphereMesh2.geometry = sphereGeo2;
+    sphereMesh2.material = sphereMat2;
+    sphereMesh2.rotation.y = Math.PI / 4;
+
+    scene.add(sphereMesh2);
+
+    sphereMesh3.copy(sphereMesh2);
+
+    scene.add(sphereMesh3);
+
+    scene.add(farol1);
+    scene.add(farol2);
+
 })();
 // jeito para checar se algo foi carregado: usando flag
 
@@ -325,9 +365,6 @@ const groundSphereContactMat = new CANNON.ContactMaterial(
 
 world.addContactMaterial(groundSphereContactMat);
 
-var maxForce = 40;
-var maxSteerVal = Math.PI / 8;
-
 const vehicle = carro.vehicle;
 
 // TODO: ver o que tem de errado aqui
@@ -388,96 +425,11 @@ const thirdPerson = new ThirdPersonCamera({
 //Listeners
 
 // Add an event listener for the 'click' event
-document.addEventListener('click', event => {
-  // Get the mouse coordinates
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+document.addEventListener('click', handleClick.bind(null, camera, scene));
 
-  // Create a raycaster from the camera position and the mouse coordinates
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(mouse, camera);
+document.addEventListener('keydown', handleKeyDown.bind(null, camera, carro));
 
-  // Find all objects intersected by the raycaster
-  const intersects = raycaster.intersectObjects(scene.children, true);
-
-  if (intersects.length > 0) {
-    // The first intersected object is the closest one
-    const point = intersects[0].point;
-
-    // Print the X, Y, and Z coordinates to the console
-    console.log(`COORDENADAS: X: ${point.x}, Y: ${point.y}, Z: ${point.z}`);
-  }
-});
-
-document.addEventListener('keydown', (e) => {
-    switch (e.key) {
-
-        case 'W':
-        case 'w':
-        case 'ArrowUp':
-            vehicle.setWheelForce(maxForce, 0);
-            vehicle.setWheelForce(maxForce, 1);
-            break;
-
-        case 'S':
-        case 's':
-        case 'ArrowDown':
-            vehicle.setWheelForce(-maxForce / 2, 0);
-            vehicle.setWheelForce(-maxForce / 2, 1);
-            break;
-    
-        case 'A':
-        case 'a':
-        case 'ArrowLeft':
-            vehicle.setSteeringValue(maxSteerVal, 0);
-            vehicle.setSteeringValue(maxSteerVal, 1);
-            break;
-
-        case 'D':
-        case 'd':
-        case 'ArrowRight':
-            vehicle.setSteeringValue(-maxSteerVal, 0);
-            vehicle.setSteeringValue(-maxSteerVal, 1);
-            break;
-        }
-});
-
-document.addEventListener('keyup', (e) => {
-    switch (e.key) {
-        case 'W':
-        case 'w':
-        case 'ArrowUp':
-            vehicle.setWheelForce(0, 0);
-            vehicle.setWheelForce(0, 1);
-            break;
-            
-        case 'S':
-        case 's':
-        case 'ArrowDown':
-            vehicle.setWheelForce(0, 0);
-            vehicle.setWheelForce(0, 1);
-            break;
-            
-        case 'A':
-            case 'a':
-        case 'ArrowLeft':
-            vehicle.setSteeringValue(0, 0);
-            vehicle.setSteeringValue(0, 1);
-            break;
-
-        case 'D':
-        case 'd':
-        case 'ArrowRight':
-            vehicle.setSteeringValue(0, 0);
-            vehicle.setSteeringValue(0, 1);
-            break;
-
-        case 'Enter':
-            camera.lockOn = !camera.lockOn;
-            break;
-    }
-});
+document.addEventListener('keyup', handleKeyUp.bind(null, camera, carro));
 
 const timeStep = 1 / 60;
 
@@ -485,8 +437,8 @@ const timeStep = 1 / 60;
 function attOptions() {
     boxBody.mass = options.boxMass;
     sphereBody.mass = options.sphereMass;
-    maxForce = options.wheelForce;
-    maxSteerVal = options.wheelSteer;
+    carro.maxForce = options.wheelForce;
+    carro.maxSteerVal = options.wheelSteer;
     carro.setTamanho(options.tamanhoCarro);
     sun.setPosition(
         250*Math.cos(Math.PI*(1.5+options.horario/12)), 
@@ -654,24 +606,81 @@ function animate() {
 
     attOptions();
 
-    // mesma coisa do que ta explicado em baixo (programacao paralela mal feita rs)
-    if (carro.hasOwnProperty('carroMesh')){
+    // realizar aqui animações quando a malha do carro for instanciada
+    if (carro.carroMesh && sphereMesh2){
 
-        // if checando se o objeto carroMesh tem a propriedade position
-        // (buga no começo da renderização pois em certo tempo 'position' eh undefined)
-        if (carro.carroMesh.hasOwnProperty('position')){
-            // vec3 com posicao da malha do carro
-            var pos = carro.carroMesh.position;
-            
-            // console.log(pos);
-            
-            // verificação da partida/chegada
-            // if (line.) {
-            //         console.log("passou pela linha");
-            // }
+        const positions = carro.carroMesh.geometry.attributes.position.array;
+        const position  = carro.carroMesh.position;
 
-        }
+        // console.log("carro e farol carregados");
+        // console.log(carro.carroMesh.geometry.getAttribute('position'));
+        // console.log(carro.carroMesh.geometry.index);
+        // console.log(carro.carroMesh.position);
+        // sphereMesh2.quaternion.copy(carro.vehicle.chassisBody.quaternion);
+        // console.log(sphereMesh2);
+        
+        
+        var rotacaoQuaternio = carro.vehicle.chassisBody.quaternion;
+        var rotacaoEuler = new CANNON.Vec3();
+        rotacaoQuaternio.toEuler(rotacaoEuler);
+
+        // var anguloRotacaoX = rotacaoEuler.x;
+        var anguloRotacaoY = rotacaoEuler.y;
+        console.log(anguloRotacaoY);
+        // var anguloRotacaoZ = rotacaoEuler.z;
+        
+        const x1 = positions[indice];
+        const y1 = positions[indice+1];
+        const z1 = positions[indice+2];
+        const posicao1 = new THREE.Vector3(x1, y1, z1);
+
+        const raio = distPontos2D(
+            posicao1.x, posicao1.z,
+            3, 3
+        );
+
+        const par = calcular_posicao_vertice(
+            carro.vehicle.chassisBody.position.x, carro.vehicle.chassisBody.position.z,
+            -raio,
+            6.2831853072 - anguloRotacaoY + 0.13
+        );
+
+        const par2 = calcular_posicao_vertice(
+            carro.vehicle.chassisBody.position.x, carro.vehicle.chassisBody.position.z,
+            -raio,
+            6.2831853072 - anguloRotacaoY - 0.13
+        );
+
+        // colocando + 0.3 ajeita farol direito
+        const parfarol = calcular_posicao_vertice(
+            carro.vehicle.chassisBody.position.x, carro.vehicle.chassisBody.position.z,
+            -raio + 1,
+            6.2831853072 - anguloRotacaoY + 0.13
+        );
+
+        // colocando - 0.3 ajeita farol direito
+        const par2farol = calcular_posicao_vertice(
+            carro.vehicle.chassisBody.position.x, carro.vehicle.chassisBody.position.z,
+            -raio + 1,
+            6.2831853072 - anguloRotacaoY - 0.13
+        );
+
+        sphereMesh2.position.x = par.x;
+        sphereMesh2.position.y = position.y;
+        sphereMesh2.position.z = par.y;
+
+        sphereMesh3.position.x = par2.x;
+        sphereMesh3.position.y = position.y;
+        sphereMesh3.position.z = par2.y;
+
+        farol1.target = sphereMesh2;
+        farol1.position.set(parfarol.x, position.y + 0.4, parfarol.y);
+
+        farol2.target = sphereMesh3;
+        farol2.position.set(par2farol.x, position.y + 0.4, par2farol.y);
+        
     }
+
 
     checkColisions();
 }
