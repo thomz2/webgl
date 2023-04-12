@@ -6,6 +6,9 @@ import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader'
 export class Carro {
 
     constructor(scene = false, world = false) {
+
+        this.maxForce = 40;
+        this.maxSteerVal = Math.PI / 8;
         
         this.criarMaterial = () => new THREE.ShaderMaterial({
             uniforms:{}, 
@@ -189,18 +192,19 @@ export class Carro {
 
                   geometry.setAttribute('color', new THREE.BufferAttribute( new Float32Array(colors), 3 ));
                   
-                const material= new THREE.MeshPhongMaterial({vertexColors:true})
+                const material= new THREE.MeshPhongMaterial({vertexColors:true});
                   
                 this.carroMesh = new THREE.Mesh(
                     geometry,
                     material
                 );
 
+                this.carroMesh.name = "carro2js";
+
                 this.carroMesh.castShadow = true;
                 this.carroMesh.receiveShadow = true;
 
                 console.log(this.carroMesh)
-        
         
                 this.scene.add(this.carroMesh);
 
