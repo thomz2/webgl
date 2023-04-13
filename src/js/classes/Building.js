@@ -31,7 +31,7 @@ export class Building extends THREE.BufferGeometry{
 
         // this.getRotation();
 
-        this.geometry = new THREE.BoxGeometry(this.width,10,this.length)
+        this.geometry = new THREE.BoxGeometry(this.width,30,this.length)
     }
 
     //Extrai os vértices da outline
@@ -144,7 +144,7 @@ export class Building extends THREE.BufferGeometry{
 
     getPosition(){
 
-        let pivo = this.getVertex(this.lados[0].i);
+        let pivo = this.getVertex(this.lados[0].i).add(this.getVertex(this.lados[0].j)).multiplyScalar(1/2);
 
         this.position = pivo;
     }
@@ -165,8 +165,8 @@ export class Building extends THREE.BufferGeometry{
     getPhysicsBody(material){
         return new CANNON.Body({
             mass: 0,
-            shape: new CANNON.Box(new CANNON.Vec3(this.width/2, 5, this.length/2)),
-            position: new CANNON.Vec3(this.position.x + this.width/2, 5, this.position.z+this.length/2),
+            shape: new CANNON.Box(new CANNON.Vec3(this.width/2, 10, this.length/2)),
+            position: new CANNON.Vec3(this.position.x + this.width/2, 10, this.position.z+this.length/2),
             material: material
         });
     }
