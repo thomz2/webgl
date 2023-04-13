@@ -10,8 +10,8 @@ export function dist3Pontos2D(x1, y1, z1, x2, y2, z2) {
 
 // ANGULO EM RADIANO
 export function calcular_posicao_vertice(centro_x, centro_y, raio, angulo) {
-    x = centro_x + raio * Math.cos(angulo);
-    y = centro_y + raio * Math.sin(angulo);
+    const x = centro_x + raio * Math.cos(angulo);
+    const y = centro_y + raio * Math.sin(angulo);
 
     return {x, y};
 }

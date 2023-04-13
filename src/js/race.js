@@ -1,4 +1,4 @@
-export default Race = {
+export const Race = {
     startPosition : [ 3.71,0,61.19 ],
 
     photoPosition : [ -55, 0, -80 ],

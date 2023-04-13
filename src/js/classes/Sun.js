@@ -8,6 +8,7 @@ export class Sun {
         this.spotLight = new THREE.SpotLight(0xFFFFFF, 1);
         this.spotLight.angle = 0.7;
         this.spotLight.castShadow = true;
+        this.spotLight.distance = 10000;
         
         // scene
         this.scene = scene;

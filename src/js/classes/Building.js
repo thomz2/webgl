@@ -165,8 +165,8 @@ export class Building extends THREE.BufferGeometry{
     getPhysicsBody(material){
         return new CANNON.Body({
             mass: 0,
-            shape: new CANNON.Box(new CANNON.Vec3(this.width/2, 10, this.length/2)),
-            position: new CANNON.Vec3(this.position.x + this.width/2, 10, this.position.z+this.length/2),
+            shape: new CANNON.Box(new CANNON.Vec3(this.width/2, 30, this.length/2)),
+            position: new CANNON.Vec3(this.position.x + this.width/2, 30, this.position.z+this.length/2),
             material: material
         });
     }

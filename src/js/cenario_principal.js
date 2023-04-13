@@ -11,7 +11,7 @@ import { Sun } from './classes/Sun';
 import { Lamp } from './classes/Lamp';
 // import { Tunnel } from './classes/Tunnel';
 
-import Race from './race';
+import {Race} from './race';
 
 import posx from '../assets/posx.jpg'
 import negx from '../assets/negx.jpg'
@@ -34,7 +34,6 @@ import { calcular_posicao_vertice, distPontos2D } from './fisica';
 
 Race.track.leftCurb = Race.track.leftCurb.map(coord => coord*3);
 Race.track.rightCurb = Race.track.rightCurb.map(coord => coord*3);
-console.log(Race.lamps.map(lamp => ({position:lamp.position.map(coord => 3*coord)})))
 Race.lamps = Race.lamps.map(lamp => ({...lamp, position:lamp.position.map(coord => 3*coord)}));
 Race.buildings = Race.buildings.map(building => ({outline: building.outline.map(coord => 2.6*coord)}));
 Race.trees = Race.trees.map(tree => ({...tree, position: tree.position.map(coord => 3*coord)}));
@@ -91,7 +90,7 @@ const options = {
     tamanhoCarro: 1
 };
 
-gui = new dat.GUI();
+const gui = new dat.GUI();
 
 function retornarAtivarGrama(){
     var grama = false;
@@ -106,21 +105,21 @@ gui.add(options, 'sphereMass', 0.1, 2);
 gui.add(options, 'wheelForce', 5, 100);
 gui.add(options, 'wheelSteer', Math.PI / 16, Math.PI / 2);
 gui.add(options, 'tamanhoCarro', 0.1, 1.5);
-gui.add(options, 'horario',0,24);
+gui.add(options, 'horario',0,24).onChange(() => updateBackground())
 gui.add({"Mudar Câmera": () => camera.lockOn = !camera.lockOn}, 'Mudar Câmera')
 gui.add({"Modo debug": () => options.debug = !options.debug}, 'Modo debug')
 gui.add({"Ativar grama": retornarAtivarGrama()}, "Ativar grama");
 
 //Luzes ambiente e direcional + Sol + background
 const luzAmbiente = new THREE.AmbientLight(0xfffff0,0.3);
-luzAmbiente.intensity = 0.2;
+luzAmbiente.intensity = 0.1;
 scene.add(luzAmbiente);
 
 const sun = new Sun(scene, -200, 200, -200);
 
 const cubeTextureLoader = new THREE.CubeTextureLoader();
 
-scene.background = cubeTextureLoader.load([
+const background = cubeTextureLoader.load([
     posx,
     negx,
     posy,
@@ -128,6 +127,13 @@ scene.background = cubeTextureLoader.load([
     negz,
     posz
 ]);
+
+scene.background = background;
+
+function updateBackground(){
+    
+    scene.backgroundIntensity = (1+Math.sin(Math.PI*(-0.5+options.horario/12)))/2;
+}
 
 //Malhas do Threejs
 
@@ -450,6 +456,7 @@ function attOptions() {
         1250*Math.sin(Math.PI*(1.5+options.horario/12)), 
         -500
     );
+
 }
 
 /////////////////////////////////////////

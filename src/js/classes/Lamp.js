@@ -7,7 +7,7 @@ export class Lamp extends THREE.Group{
         super();
         
         const tronco = new THREE.Mesh(
-                            new THREE.CylinderGeometry(radius,radius,height,32), 
+                            new THREE.CylinderGeometry(radius,radius,height,3), 
                             new THREE.MeshPhongMaterial({color: 0x725c42})
                         );
 
