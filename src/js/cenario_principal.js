@@ -32,6 +32,14 @@ import CannonDebugger from 'cannon-es-debugger';
 import { handleClick, handleKeyDown, handleKeyUp } from './eventlisteners';
 import { calcular_posicao_vertice, distPontos2D } from './fisica';
 
+Race.track.leftCurb = Race.track.leftCurb.map(coord => coord*3);
+Race.track.rightCurb = Race.track.rightCurb.map(coord => coord*3);
+console.log(Race.lamps.map(lamp => ({position:lamp.position.map(coord => 3*coord)})))
+Race.lamps = Race.lamps.map(lamp => ({...lamp, position:lamp.position.map(coord => 3*coord)}));
+Race.buildings = Race.buildings.map(building => ({outline: building.outline.map(coord => 2.6*coord)}));
+Race.trees = Race.trees.map(tree => ({...tree, position: tree.position.map(coord => 3*coord)}));
+
+
 //Shaders
 const VS = `
 varying vec4 pos;
@@ -64,7 +72,7 @@ const camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    10000
 );
 
 const orbit = new OrbitControls(camera, renderer.domElement);
@@ -133,11 +141,11 @@ const boxMesh = new THREE.Mesh(boxGeo, boxMat);
 scene.add(boxMesh);
 
 //Gramado da cena
-const groundGeo = new THREE.PlaneGeometry(300, 300);
+const groundGeo = new THREE.PlaneGeometry(3000, 3000);
 const texture = new THREE.TextureLoader().load(grass);
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
-texture.repeat.set(5,5);
+texture.repeat.set(50,50);
 const groundMat = new THREE.MeshStandardMaterial({ 
 	map: texture
  });
@@ -153,7 +161,7 @@ const pista = new THREE.Mesh(
         map: new THREE.TextureLoader().load(highway)
     })
 );
-pista.position.y = 0.1
+pista.position.y = 0.3
 
 scene.add(pista);
 pista.receiveShadow = true;
@@ -185,17 +193,14 @@ Race.buildings.map(construcao =>{
     objeto.receiveShadow = false;
     objeto.renderOrder = 0;
 
-    console.log(objeto.position);
-
     objeto.position.x = building.position.x + building.width/2;
-    objeto.position.y = 5;
+    objeto.position.y = 15;
     objeto.position.z = building.position.z+building.length/2;
 
     objeto.rotation.set(0,Math.PI/3,0)
 
     scene.add(objeto)
 
-    console.log(new THREE.BoxGeometry(1,2,1))
 });
 
 Race.lamps.map(lampada => {
@@ -303,7 +308,7 @@ const cannonDebugger = new CannonDebugger(scene, world, {
 const groundPhysMat = new CANNON.Material();
 
 const groundBody = new CANNON.Body({
-    shape: new CANNON.Box(new CANNON.Vec3(150, 150, 0.1)),
+    shape: new CANNON.Box(new CANNON.Vec3(1500, 1500, 0.1)),
     type: CANNON.Body.STATIC,
     material: groundPhysMat
 });
@@ -441,9 +446,9 @@ function attOptions() {
     carro.maxSteerVal = options.wheelSteer;
     carro.setTamanho(options.tamanhoCarro);
     sun.setPosition(
-        250*Math.cos(Math.PI*(1.5+options.horario/12)), 
-        250*Math.sin(Math.PI*(1.5+options.horario/12)), 
-        -200
+        1250*Math.cos(Math.PI*(1.5+options.horario/12)), 
+        1250*Math.sin(Math.PI*(1.5+options.horario/12)), 
+        -500
     );
 }
 
