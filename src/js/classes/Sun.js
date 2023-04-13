@@ -14,7 +14,7 @@ export class Sun {
         
         // sun
         this.sun = new THREE.Mesh(
-            new THREE.SphereGeometry(10),
+            new THREE.SphereGeometry(45),
         
             new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(sunimg)
